@@ -1,21 +1,16 @@
 <?php
 
 /**
- * Class Arctic_Trip
+ * Class Arctic_TripType
  * @property int $businessgroupid
- * @property int $triptypeid
  * @property int $parenttripid
  * @property int $id
- * @property string $start
  * @property string $starttime
  * @property string $subtripstartoffset
  * @property string $name
  * @property string $shortname
- * @property bool $canceled
  * @property string $color
  * @property int $openings
- * @property int $remainingopenings
- * @property int $inventoryitemid
  * @property string $duration
  * @property int $registrationformid
  * @property bool $orenable
@@ -38,10 +33,10 @@
  * @property Arctic_Trip_PricingLevel[] $pricinglevels
  * @property Arctic_Trip_Component[] $components
  */
-class Arctic_Trip extends ArcticModel
+class Arctic_TripType extends ArcticModel
 {
 	public static function getApiPath() {
-		return 'trip';
+		return 'triptype';
 	}
 
 	public function __construct() {
