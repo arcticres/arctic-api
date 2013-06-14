@@ -3,6 +3,7 @@
 /**
  * Class ArcticException
  * @method static static[] browse($start=0,$number=50)
+ * @method static static[] query($query)
  * @method static static load($id)
  * @method insert()
  * @method update()
@@ -70,6 +71,8 @@ class ArcticModel
 		switch ( $method ) {
 			case 'browse':
 				return new ArcticModelMethodBrowse();
+			case 'query':
+				return new ArcticModelMethodQuery();
 			case 'load':
 				return new ArcticModelMethodLoad();
 			case 'insert':
