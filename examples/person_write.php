@@ -4,7 +4,11 @@
 chdir(__DIR__);
 require 'init.i.php';
 
-// write person
+// load person #3
 $person = Arctic_Person::load(3);
+
+// change their information
 $person->namecompany = 'Self-Employed';
+
+// issue update command
 $person->update();

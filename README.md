@@ -13,4 +13,4 @@ fields (although fields may vary based on system configuration) and examples sho
 To use these functions, you must have both client credentials and API credentials. If you are
 an Arctic Reservations customer, please contact support for this information.
 
-v0.1 (alpha)
+v0.2 (alpha)
