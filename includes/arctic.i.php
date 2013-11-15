@@ -25,6 +25,7 @@ class ArcticAPI
 	const METHOD_DELETE = 'DELETE';
 
 	private static $_instance;
+    private static $_last_error;
 	private $_config;
 	private $_token;// = '87229389851b7ed3b455542.11434835';
 
@@ -98,6 +99,9 @@ class ArcticAPI
 //	}
 
 	public function raiseError($error_name,$error_description) {
+        // store last error
+        self::$_last_error = sprintf('%s: %s',$error_name,$error_description);
+
 		switch ( isset( $this->_config ) && isset( $this->_config[ 'errors' ] ) ? $this->_config[ 'errors' ] : self::ERRORS_EXCEPTION ) {
 			case self::ERRORS_EXCEPTION:
 				throw new ArcticException(sprintf('%s: %s',$error_name,$error_description));
@@ -113,6 +117,14 @@ class ArcticAPI
 				throw new ArcticException('Invalid configuration value for "errors".');
 		}
 	}
+
+    /**
+     * Get the last error raised by the API call.
+     * @return string|null
+     */
+    public static function getLastError() {
+        return self::$_last_error;
+    }
 
 	private function _log($request,$body,$response) {
 		if ( $this->_getConfig('debug') ) {

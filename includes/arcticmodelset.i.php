@@ -112,5 +112,4 @@ class ArcticModelSet implements \IteratorAggregate, \ArrayAccess, \Countable
 		}
 		return false;
 	}
-
 }

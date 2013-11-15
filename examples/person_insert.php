@@ -20,4 +20,3 @@ $person->emailaddresses[] = $ea;
 
 // insert both the person and any new references
 $person->insert();
-
