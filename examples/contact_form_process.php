@@ -5,7 +5,7 @@
 // create a new person and fill in details (name)
 $person = new Arctic_Person();
 $person->namefirst = $_POST['namefirst'];
-$person->namelast = $_POST['namefirst'];
+$person->namelast = $_POST['namelast'];
 $person->customersource = $_POST['hear'];
 
 // create an email address, and fill in details
