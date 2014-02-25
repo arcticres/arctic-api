@@ -37,6 +37,7 @@ class Arctic_Invoice__MethodRefresh extends ArcticModelMethod
  * @property Arctic_Person $person
  * @property Arctic_Invoice_Group[] $groups
  * @property Arctic_Invoice_Item[] $items
+ * @property Arctic_Invoice_Transaction[] $transactions
  * @method refresh()
  */
 class Arctic_Invoice extends ArcticModel
@@ -51,6 +52,7 @@ class Arctic_Invoice extends ArcticModel
         $this->_addSingleReference('person' ,'Arctic_Person',array('personid'=>'id'));
         $this->_addMultipleReference('groups','Arctic_Invoice_Group','group',array('id'=>'invoiceid'));
         $this->_addMultipleReference('items','Arctic_Invoice_Item','item',array('id'=>'invoiceid'));
+        $this->_addMultipleReference('transactions','Arctic_Invoice_Transaction','transaction',array('id'=>'invoiceid'));
     }
 
     protected static function _mapMethod( $method ) {

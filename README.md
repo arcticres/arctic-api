@@ -13,4 +13,19 @@ fields (although fields may vary based on system configuration) and examples sho
 To use these functions, you must have both client credentials and API credentials. If you are
 an Arctic Reservations customer, please contact support for this information.
 
-v0.3 (alpha)
+Support for:
+
+* Persons
+* Person metadata - addresses, phone numbers, email addresses, notes
+* Inquiries
+* Invoices
+* Invoice data - groups, items, transactions
+* Trips
+* Trip types
+* Trip pricing levels
+* Trip add-ons
+* Rental items
+* Rental item pricing levels
+* Business groups
+
+v0.4 (alpha)
