@@ -39,6 +39,7 @@ class Arctic_Invoice__MethodRefresh extends ArcticModelMethod
  * @property Arctic_Invoice_Item[] $items
  * @property Arctic_Invoice_Transaction[] $transactions
  * @method refresh()
+ * @method email(int $templateid=null,bool $outbox=false)
  */
 class Arctic_Invoice extends ArcticModel
 {
@@ -58,6 +59,9 @@ class Arctic_Invoice extends ArcticModel
     protected static function _mapMethod( $method ) {
         if ( $method === 'refresh' ) {
             return new Arctic_Invoice__MethodRefresh();
+        }
+        if ( $method === 'email' ) {
+            return new ArcticModelMethod( ArcticModelMethod::TYPE_EXISTING_MODEL , ArcticAPI::METHOD_POST , 'email' , [ 'templateid' , 'outbox' ] );
         }
         return parent::_mapMethod( $method );
     }
