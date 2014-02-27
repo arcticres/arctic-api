@@ -18,6 +18,21 @@ class Arctic_Invoice__MethodRefresh extends ArcticModelMethod
     }
 }
 
+class Arctic_Invoice__MethodPdf extends ArcticModelMethod
+{
+    public function __construct() {
+        parent::__construct( self::TYPE_EXISTING_MODEL , ArcticAPI::METHOD_GET , 'pdf' );
+    }
+
+    /**
+     * @param array $response
+     * @return array
+     */
+    protected function _parseResponse( $response ) {
+        return $response;
+    }
+}
+
 
 /**
  * Class Arctic_Invoice
@@ -40,6 +55,7 @@ class Arctic_Invoice__MethodRefresh extends ArcticModelMethod
  * @property Arctic_Invoice_Transaction[] $transactions
  * @method refresh()
  * @method email(int $templateid=null,bool $outbox=false)
+ * @method pdf()
  */
 class Arctic_Invoice extends ArcticModel
 {
@@ -57,12 +73,21 @@ class Arctic_Invoice extends ArcticModel
     }
 
     protected static function _mapMethod( $method ) {
+        // invoice specific method: refresh()
         if ( $method === 'refresh' ) {
             return new Arctic_Invoice__MethodRefresh();
         }
+
+        // invoice specific method: email($templateid=null, $outbox=false)
         if ( $method === 'email' ) {
             return new ArcticModelMethod( ArcticModelMethod::TYPE_EXISTING_MODEL , ArcticAPI::METHOD_POST , 'email' , [ 'templateid' , 'outbox' ] );
         }
+
+        // invoice specific method: pdf()
+        if ( $method === 'pdf' ) {
+            return new Arctic_Invoice__MethodPdf();
+        }
+
         return parent::_mapMethod( $method );
     }
 }

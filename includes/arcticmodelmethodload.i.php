@@ -26,6 +26,11 @@ class ArcticModelMethodLoad extends ArcticModelMethod
 		// first element
 		$this->_id = reset( $arguments );
 
+        // check for ID
+        if ( empty( $this->_id ) ) {
+            ArcticAPI::getInstance()->raiseError('No ID Specified','Load expects a valid object ID to fetch.');
+        }
+
 		// build uri
 		$uri = $api_path . '/' . urlencode( $this->_id );
 
