@@ -58,6 +58,9 @@ class ArcticReferenceWrapper
 			$foreign = reset( $mapping );
 			$local = key( $mapping );
 
+            // mark as loaded (even if loading fails, no need to reattempt)
+            $this->_loaded = true;
+
 			// id
 			$id = $this->_parent->$local;
 
@@ -126,4 +129,16 @@ class ArcticReferenceWrapper
 
 		return $this->_model->__call( $name , $arguments );
 	}
+
+    /**
+     * Used by wrapper->isset() to see if a reference is defined.
+     * @return bool
+     */
+    public function isDefined() {
+        if ( !$this->_loaded ) {
+            if ( !$this->_load() ) return false;
+        }
+
+        return true;
+    }
 }

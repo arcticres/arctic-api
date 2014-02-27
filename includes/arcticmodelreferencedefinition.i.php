@@ -80,6 +80,7 @@ class ArcticModelReferenceDefinition
 			return (bool)count( $value );
 		}
 
-
+        /** @var ArcticReferenceWrapper $value */
+        return $value->isDefined();
 	}
 }
