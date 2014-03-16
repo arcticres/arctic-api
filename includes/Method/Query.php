@@ -19,6 +19,12 @@ class Query extends Method
 	 * @return Model[]
 	 */
 	protected function _parseResponse( $response ) {
+        // add to cache
+        foreach ( $response['entries'] as $arr ) {
+            if (!isset($arr['id'])) continue;
+            Api::getInstance()->getCacheManager()->set($arr['id'], $arr, $this->_model_class);
+        }
+
 		return new ModelSet( $this->_model_class , $response );
 	}
 }

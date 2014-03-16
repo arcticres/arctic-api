@@ -293,7 +293,7 @@ class Api
         // use cache
         $cache = 'token::' . $this->_getConfig('username');
         if ($token = $this->getCacheManager()->get($cache)) {
-            return $token;
+            return $this->_token = $token;
         }
 
 		// fetch token
@@ -319,7 +319,7 @@ class Api
             $this->_token = $response[ 'access_token' ];
 
             // cache token
-            $this->getCacheManager()->set($cache, $this->_token);
+            $this->getCacheManager()->set($cache, $this->_token, null , isset($response[ 'expires_in' ]) ? (int)$response[ 'expires_in' ] : null);
 
 			return $this->_token;
 		}

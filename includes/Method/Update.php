@@ -18,6 +18,11 @@ class Update extends Method
 	protected function _parseResponse( $response ) {
 		$this->_model->fillExistingData( $this->_model->getID() , $response );
 
+        // update cache if an ID was returned
+        if ($id = $this->_model->getID()) {
+            Api::getInstance()->getCacheManager()->set($id, $response, $this->_model_class);
+        }
+
 		return $this->_model;
 	}
 

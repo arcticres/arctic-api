@@ -6,6 +6,8 @@ use Arctic\Exception;
 
 class Manager
 {
+    const DEFAULT_CACHE = 60;
+
     /**
      * @var Cache
      */
@@ -97,6 +99,13 @@ class Manager
             $profile = $this->_cache_profile;
         }
 
+        // no profile? use cache profile entry
+        if (!isset($profile) && $class) {
+            if (method_exists($class, 'getCacheProfile')) {
+                return call_user_func([$class, 'getCacheProfile'], $key);
+            }
+        }
+
         // no profile?
         if (!isset($profile)) {
             return null;
@@ -115,7 +124,14 @@ class Manager
         return null;
     }
 
-    public function get($key, $class=null) {
+    /**
+     * Gets a value from the cache if the profile is not false.
+     * @param string $key
+     * @param string|null $class The class with which the key is associated with. This gets appended as the key, but also is used for determining caching profiles.
+     * @param int|bool|null $default_profile The default profile to use if neither class nor the cache manager profile specifies a caching profile.
+     * @return mixed
+     */
+    public function get($key, $class=null, $default_profile=null) {
         // no cache
         if (!$this->_cache) {
             return null;
@@ -140,7 +156,13 @@ class Manager
         return $this->_cache->get($key);
     }
 
-    public function set($key, $value, $class=null) {
+    /**
+     * @param string $key
+     * @param mixed $value The value to set.
+     * @param string|null $class The class with which the key is associated with. This gets appended as the key, but also is used for determining caching profiles.
+     * @param int|bool|null $default_profile The default profile to use if neither class nor the cache manager profile specifies a caching profile.
+     */
+    public function set($key, $value, $class=null, $default_profile=null) {
         // no cache
         if (!$this->_cache) {
             return;
@@ -150,8 +172,26 @@ class Manager
         $profile = $this->_getCacheProfile($key, $class);
         if ( $profile === false ) return;
 
+        // use default cache profile
+        if ( $profile === null ) $profile = ($default_profile ? $default_profile : self::DEFAULT_CACHE);
+
         // run cache
         if ($class) $key = sprintf('%s::%s', $class, $key);
         $this->_cache->set($key, $value, ($profile === true ? 0 : $profile));
+    }
+
+    /**
+     * @param $key
+     * @param string|null $class The class with which the key is associated with. This gets appended as the key, but also is used for determining caching profiles.
+     */
+    public function remove($key, $class=null) {
+        // no cache
+        if (!$this->_cache) {
+            return;
+        }
+
+        // run cache
+        if ($class) $key = sprintf('%s::%s', $class, $key);
+        $this->_cache->remove($key);
     }
 }
