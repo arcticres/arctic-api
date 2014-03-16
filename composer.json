@@ -7,7 +7,8 @@
     "authors": [
         {
             "name": "L. Nathan Perkins",
-            "email": "nathan@arcticreservations.com"
+            "email": "nathan@arcticreservations.com",
+            "homepage": "http://www.nathanntg.com/"
         }
     ],
     "require": {
@@ -15,7 +16,7 @@
     },
     "autoload": {
         "psr-0": {
-            "HelloWorld": "src/"
+            "Arctic": "includes/"
         }
     }
 }
