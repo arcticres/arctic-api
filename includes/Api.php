@@ -29,8 +29,14 @@ class Api
 
 	private static $_instance;
     private static $_last_error;
+
 	private $_config;
 	private $_token;
+
+    /**
+     * @var Cache\Manager
+     */
+    private $_cache_manager;
 
 	private function __construct() {
 	}
@@ -130,6 +136,21 @@ class Api
             spl_autoload_register(__CLASS__ . '::autoloadClass');
         }
 	}
+
+    /**
+     * @return Cache\Manager
+     */
+    public function getCacheManager() {
+        // initiate cache manager
+        if (!isset($this->_cache_manager)) {
+            $this->_cache_manager = new Cache\Manager(
+                $this->_getConfig('cache'),
+                $this->_getConfig('cache_config', ['prefix'=>$this->_getConfig('installation')])
+            );
+        }
+
+        return $this->_cache_manager;
+    }
 
 //	private function _signRequest( $url , $method , $body=null ) {
 //		//if ( $body ) return hash_hmac('sha256',$body,)
@@ -269,6 +290,12 @@ class Api
 			return $this->_token = $token;
 		}
 
+        // use cache
+        $cache = 'token::' . $this->_getConfig('username');
+        if ($token = $this->getCacheManager()->get($cache)) {
+            return $token;
+        }
+
 		// fetch token
 		$request = array(
 			'client_id'     =>  $this->_getConfig('client_id'),
@@ -289,7 +316,12 @@ class Api
 
 		// success!
 		if ( is_array( $response ) && isset( $response[ 'access_token' ] ) ) {
-			return $this->_token = $response[ 'access_token' ];
+            $this->_token = $response[ 'access_token' ];
+
+            // cache token
+            $this->getCacheManager()->set($cache, $this->_token);
+
+			return $this->_token;
 		}
 
 		// error
