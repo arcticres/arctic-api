@@ -33,7 +33,6 @@ class Api
 	private $_token;
 
 	private function __construct() {
-		spl_autoload_register(__CLASS__ . '::autoloadClass');
 	}
 
 	public function __clone() {
@@ -100,6 +99,7 @@ class Api
 			'auth_path'     =>  'oauth/application/token',
 			'secure'        =>  true,
 			'errors'        =>  self::ERRORS_EXCEPTION,
+            'autoload'      =>  null,
 			'sign'          =>  null
 		);
 
@@ -108,10 +108,27 @@ class Api
 		else $config = array_merge( $config , $default_config );
 
 		// assemble host
-		if ( !isset( $config[ 'host' ] ) ) $config[ 'host' ] = $installation_name . '.arcticres.com';
+		if ( !isset( $config[ 'host' ] ) ) {
+            $config[ 'host' ] = $installation_name . '.arcticres.com';
+        }
+
+        // get instance
+        $instance = self::getInstance();
 
 		// store configuration
-		self::getInstance()->_setConfiguration($config);
+		$instance->_setConfiguration($config);
+
+        // determine if autoloader is needed
+        $need_autoload = $instance->_getConfig('autoload');
+        if ( $need_autoload === null ) {
+            // try to autoload base model to determine if an autoloader is needed
+            $need_autoload = !class_exists( __NAMESPACE__ . '\Model' , true );
+        }
+
+        // if need autoloader, register it
+        if ( $need_autoload ) {
+            spl_autoload_register(__CLASS__ . '::autoloadClass');
+        }
 	}
 
 //	private function _signRequest( $url , $method , $body=null ) {
