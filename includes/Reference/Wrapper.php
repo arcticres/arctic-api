@@ -145,6 +145,8 @@ class Wrapper
 			if ( !$this->_load() ) return false;
 		}
 
+        if ( !$this->_model ) throw new \BadMethodCallException( 'Unable to call "' . $name . '" on undefined object.' );
+
 		return $this->_model->__call( $name , $arguments );
 	}
 
@@ -157,6 +159,6 @@ class Wrapper
             if ( !$this->_load() ) return false;
         }
 
-        return true;
+        return isset( $this->_model );
     }
 }
