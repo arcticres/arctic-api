@@ -5,7 +5,7 @@ chdir(__DIR__);
 require 'init.i.php';
 
 // loads person with ID #3 (assumes they exist)
-$person = Arctic_Person::load(3);
+$person = \Arctic\Model\Person\Person::load(3);
 echo $person->namefirst , ' ' , $person->namelast , "\n";
 
 // change the type of the first email address (again, assumes it exists)

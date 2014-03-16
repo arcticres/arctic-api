@@ -5,12 +5,12 @@ chdir(__DIR__);
 require 'init.i.php';
 
 // create a new person and fill in details (name)
-$person = new Arctic_Person();
+$person = new \Arctic\Model\Person\Person();
 $person->namefirst = 'Hannah';
 $person->namelast = 'Wyoming';
 
 // create an email address, and fill in details
-$ea = new Arctic_Person_EmailAddress();
+$ea = new \Arctic\Model\Person\EmailAddress();
 $ea->isprimary = true;
 $ea->type = 'Home';
 $ea->emailaddress = 'hannah@maxmo.net';

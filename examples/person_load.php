@@ -5,7 +5,7 @@ chdir(__DIR__);
 require 'init.i.php';
 
 // load person with ID #7 (assumes they exist)
-$person = Arctic_Person::load(7);
+$person = \Arctic\Model\Person\Person::load(7);
 echo $person->namefirst , ' ' , $person->namelast , "\n";
 
 // print email addresses

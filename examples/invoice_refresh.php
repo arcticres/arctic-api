@@ -5,7 +5,7 @@ chdir(__DIR__);
 require 'init.i.php';
 
 // load invoice
-$invoice = Arctic_Invoice::load(185);
+$invoice = \Arctic\Model\Invoice\Invoice::load(185);
 
 // total cost
 echo "Total Cost: ", $invoice->totalcost, PHP_EOL;

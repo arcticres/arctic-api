@@ -3,13 +3,13 @@
 
 // save arctic inquiry
 // create a new person and fill in details (name)
-$person = new Arctic_Person();
+$person = new \Arctic\Model\Person\Person();
 $person->namefirst = $_POST['namefirst'];
 $person->namelast = $_POST['namelast'];
 $person->customersource = $_POST['hear'];
 
 // create an email address, and fill in details
-$ea = new Arctic_Person_EmailAddress();
+$ea = new \Arctic\Model\Person\EmailAddress();
 $ea->isprimary = true;
 $ea->type = 'Home';
 $ea->emailaddress = $_POST['email'];
@@ -18,7 +18,7 @@ $ea->emailaddress = $_POST['email'];
 $person->emailaddresses[] = $ea;
 
 // create an address, and fill in details
-$addr = new Arctic_Person_Address();
+$addr = new \Arctic\Model\Person\Address();
 $addr->isprimary = true;
 $addr->type = 'Home';
 $addr->address1 = $_POST['address'];
@@ -32,7 +32,7 @@ $country = addslashes($_POST['country']);
 $country_id = null;
 if ( $country !== 'US' && $country !== 'USA' && $country !== 'United States' && $country !== 'United States of America' ) {
     // look up country id
-    foreach ( Arctic_Country::query('name = \'' . $country . '\' OR twodigitcode = \'' . $country . '\' OR threedigitcode = \'' . $country . '\' LIMIT 0, 1' ) as $country ) {
+    foreach ( \Arctic\Model\Country::query('name = \'' . $country . '\' OR twodigitcode = \'' . $country . '\' OR threedigitcode = \'' . $country . '\' LIMIT 0, 1' ) as $country ) {
         $addr->countryid = $country->id;
         $country_id = $country->id;
     }
@@ -43,7 +43,7 @@ $person->addresses[] = $addr;
 
 if ( $_POST[ 'phone_day' ] ) {
     // create a phone number, and fill in details
-    $ph = new Arctic_Person_PhoneNumber();
+    $ph = new \Arctic\Model\Person\PhoneNumber();
     $ph->isprimary = true;
     $ph->type = 'Work';
     $ph->phonenumber = $_POST[ 'phone_day' ];
@@ -55,7 +55,7 @@ if ( $_POST[ 'phone_day' ] ) {
 
 if ( $_POST[ 'phone_evening' ] ) {
     // create a phone number, and fill in details
-    $ph = new Arctic_Person_PhoneNumber();
+    $ph = new \Arctic\Model\Person\PhoneNumber();
     if ( !$_POST[ 'phone_day' ] ) $ph->isprimary = true;
     $ph->type = 'Home';
     $ph->phonenumber = $_POST[ 'phone_evening' ];
@@ -66,7 +66,7 @@ if ( $_POST[ 'phone_evening' ] ) {
 }
 
 // create a note
-$note = new Arctic_Person_Note();
+$note = new \Arctic\Model\Person\Note();
 $note->note = 'Added through contact form.';
 
 // add the note to the list of references
@@ -74,7 +74,7 @@ $person->notes[] = $note;
 
 // insert both the person and any new references
 if ( $person->insert() ) {
-    $inquiry = new Arctic_Inquiry();
+    $inquiry = new \Arctic\Inquiry\Inquiry();
     $inquiry->personid = $person->id;
     $inquiry->mode = 'Online Form';
     $inquiry->notes = $_POST[ 'message' ];
