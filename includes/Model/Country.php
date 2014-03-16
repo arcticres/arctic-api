@@ -25,4 +25,12 @@ class Country extends Model
 	public function __construct() {
 		parent::__construct();
 	}
+
+    /**
+     * Cache indefinitely.
+     * @return bool
+     */
+    public static function getCacheProfile() {
+        return true;
+    }
 }
