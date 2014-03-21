@@ -335,6 +335,13 @@ class Api
 		return false;
 	}
 
+    public function sendRequest( $api_path , $method=self::METHOD_GET , $body=null , array $headers=null ) {
+        // build url
+        $url = $this->_getConfig('host') . $this->_getConfig('api_path') . $api_path;
+
+        return $this->_sendRequest( $url , $method , $body , $headers );
+    }
+
 	public function sendAuthenticatedRequest( $api_path , $method=self::METHOD_GET , $body=null , array $headers=null ) {
 		// get token
 		$token = $this->_getToken();
