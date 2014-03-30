@@ -68,6 +68,13 @@ class Method
 
 	protected function _prepareRequest( $api_path , $arguments ) {
 		$add = '';
+
+        // allow custom variables to be passed with methods as the last argument (must be an array)
+        if ($arguments && is_array($arguments[count($arguments) - 1])) {
+            $add = http_build_query(array_pop($arguments));
+        }
+
+        // map arguments onto variables
 		if ( $this->_argument_mapping ) {
 			foreach ( $this->_argument_mapping as $index => $name ) {
 				if ( !isset( $arguments[ $index ] ) ) continue;
