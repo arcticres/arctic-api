@@ -4,9 +4,9 @@ namespace Arctic;
 
 /**
  * Class ArcticException
- * @method static[] browse($start=0,$number=50)
- * @method static[] query($query)
- * @method static load($id)
+ * @method static static[] browse($start=0,$number=50)
+ * @method static static[] query($query)
+ * @method static static load($id)
  * @method bool insert()
  * @method bool update()
  * @method delete(Model $model)
