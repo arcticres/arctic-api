@@ -42,7 +42,11 @@ class Browse extends Method
     protected function _prepareRequest($api_path, $arguments) {
         // store api path for cache
         $this->_cache_key = $api_path;
-        if ($arguments) $this->_cache_key .= '::' . implode('-', $arguments);
+        if ($arguments) {
+            // add start and count to the cache key
+            if (!is_array($arguments[0])) $this->_cache_key .= '::' . $arguments[0];
+            if (isset($arguments[1]) && !is_array($arguments[1])) $this->_cache_key .= '-' . $arguments[1];
+        }
 
         // run query
         $cache_manager = Api::getInstance()->getCacheManager();
