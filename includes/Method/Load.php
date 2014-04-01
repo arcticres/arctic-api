@@ -15,10 +15,16 @@ class Load extends Method
 
 	/**
 	 * @param array $response
+     * @param bool $update_cache
 	 * @return Model
 	 */
-	protected function _parseResponse( $response ) {
+	protected function _parseResponse($response, $update_cache=true) {
 		$class = $this->_model_class;
+
+        // update cache?
+        if ($update_cache) {
+            Api::getInstance()->getCacheManager()->set($this->_id, $response, $class);
+        }
 
 		/** @var Model $me */
 		$me = new $class();
@@ -34,6 +40,11 @@ class Load extends Method
         // check for ID
         if ( empty( $this->_id ) ) {
             Api::getInstance()->raiseError('No ID Specified','Load expects a valid object ID to fetch.');
+        }
+
+        // check cache
+        if ($cached_response = Api::getInstance()->getCacheManager()->get($this->_id, $this->_model_class)) {
+            return $this->_parseResponse($cached_response, false);
         }
 
 		// build uri

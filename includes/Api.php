@@ -29,11 +29,16 @@ class Api
 
 	private static $_instance;
     private static $_last_error;
+
 	private $_config;
 	private $_token;
 
+    /**
+     * @var Cache\Manager
+     */
+    private $_cache_manager;
+
 	private function __construct() {
-		spl_autoload_register(__CLASS__ . '::autoloadClass');
 	}
 
 	public function __clone() {
@@ -100,6 +105,7 @@ class Api
 			'auth_path'     =>  'oauth/application/token',
 			'secure'        =>  true,
 			'errors'        =>  self::ERRORS_EXCEPTION,
+            'autoload'      =>  null,
 			'sign'          =>  null
 		);
 
@@ -108,11 +114,43 @@ class Api
 		else $config = array_merge( $config , $default_config );
 
 		// assemble host
-		if ( !isset( $config[ 'host' ] ) ) $config[ 'host' ] = $installation_name . '.arcticres.com';
+		if ( !isset( $config[ 'host' ] ) ) {
+            $config[ 'host' ] = $installation_name . '.arcticres.com';
+        }
+
+        // get instance
+        $instance = self::getInstance();
 
 		// store configuration
-		self::getInstance()->_setConfiguration($config);
+		$instance->_setConfiguration($config);
+
+        // determine if autoloader is needed
+        $need_autoload = $instance->_getConfig('autoload');
+        if ( $need_autoload === null ) {
+            // try to autoload base model to determine if an autoloader is needed
+            $need_autoload = !class_exists( __NAMESPACE__ . '\Model' , true );
+        }
+
+        // if need autoloader, register it
+        if ( $need_autoload ) {
+            spl_autoload_register(__CLASS__ . '::autoloadClass');
+        }
 	}
+
+    /**
+     * @return Cache\Manager
+     */
+    public function getCacheManager() {
+        // initiate cache manager
+        if (!isset($this->_cache_manager)) {
+            $this->_cache_manager = new Cache\Manager(
+                $this->_getConfig('cache'),
+                $this->_getConfig('cache_config', ['prefix'=>$this->_getConfig('installation')])
+            );
+        }
+
+        return $this->_cache_manager;
+    }
 
 //	private function _signRequest( $url , $method , $body=null ) {
 //		//if ( $body ) return hash_hmac('sha256',$body,)
@@ -252,6 +290,12 @@ class Api
 			return $this->_token = $token;
 		}
 
+        // use cache
+        $cache = 'token::' . $this->_getConfig('username');
+        if ($token = $this->getCacheManager()->get($cache)) {
+            return $this->_token = $token;
+        }
+
 		// fetch token
 		$request = array(
 			'client_id'     =>  $this->_getConfig('client_id'),
@@ -272,7 +316,12 @@ class Api
 
 		// success!
 		if ( is_array( $response ) && isset( $response[ 'access_token' ] ) ) {
-			return $this->_token = $response[ 'access_token' ];
+            $this->_token = $response[ 'access_token' ];
+
+            // cache token
+            $this->getCacheManager()->set($cache, $this->_token, null , isset($response[ 'expires_in' ]) ? (int)$response[ 'expires_in' ] : null);
+
+			return $this->_token;
 		}
 
 		// error
@@ -285,6 +334,13 @@ class Api
 		$this->raiseError('Unknown Authentication Response','Response type: ' . gettype($response));
 		return false;
 	}
+
+    public function sendRequest( $api_path , $method=self::METHOD_GET , $body=null , array $headers=null ) {
+        // build url
+        $url = $this->_getConfig('host') . $this->_getConfig('api_path') . $api_path;
+
+        return $this->_sendRequest( $url , $method , $body , $headers );
+    }
 
 	public function sendAuthenticatedRequest( $api_path , $method=self::METHOD_GET , $body=null , array $headers=null ) {
 		// get token

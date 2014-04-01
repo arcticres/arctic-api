@@ -28,4 +28,17 @@ Support for:
 * Rental item pricing levels
 * Business groups
 
-v0.4 (alpha)
+## Version
+
+Version v0.5 (beta)
+
+The API is approaching a version 1 release. The latest version introduces substantial changes
+in directory and naming structure to enable PSR-4 and Composer support.
+
+
+## Authors
+
+**L. Nathan Perkins**
+
+- <https://github.com/nathanntg>
+- <http://www.nathanntg.com>
