@@ -91,7 +91,7 @@ class Invoice extends Model
 
         // invoice specific method: email($templateid=null, $outbox=false)
         if ( $method === 'email' ) {
-            return new Method(Method::TYPE_EXISTING_MODEL, Api::METHOD_POST, 'email', ['templateid' , 'outbox']);
+            return new Method(Method::TYPE_EXISTING_MODEL, Api::METHOD_POST, 'email', array('templateid' , 'outbox'));
         }
 
         // invoice specific method: pdf()

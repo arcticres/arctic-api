@@ -145,7 +145,7 @@ class Api
         if (!isset($this->_cache_manager)) {
             $this->_cache_manager = new Cache\Manager(
                 $this->_getConfig('cache'),
-                $this->_getConfig('cache_config', ['prefix'=>$this->_getConfig('installation')])
+                $this->_getConfig('cache_config', array('prefix'=>$this->_getConfig('installation')))
             );
         }
 

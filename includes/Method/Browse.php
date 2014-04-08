@@ -23,7 +23,7 @@ class Browse extends Method
 	 */
 	protected function _parseResponse( $response ) {
         // add to cache
-        $ids = [];
+        $ids = array();
         foreach ( $response['entries'] as $arr ) {
             if (!isset($arr['id'])) continue;
             $ids[] = $arr['id'];

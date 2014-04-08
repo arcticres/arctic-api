@@ -42,6 +42,6 @@ class PhotoRetailItem extends Model
     public function __construct() {
         parent::__construct();
 
-        $this->_addMultipleReference('shippingclass', 'Arctic\Model\Store\ShippingClass', 'shippingclass');
+        $this->_addSingleReference('shippingclass', 'Arctic\Model\Store\ShippingClass');
     }
 }

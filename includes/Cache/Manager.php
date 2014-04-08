@@ -75,7 +75,7 @@ class Manager
         // get cache profile
         if (is_array($this->_cache_profile)) {
             // make array of keys to check
-            $profile_keys = [];
+            $profile_keys = array();
             if ($class) {
                 $segments = explode('\\',$class);;
                 while ($segments) {
@@ -102,7 +102,7 @@ class Manager
         // no profile? use cache profile entry
         if (!isset($profile) && $class) {
             if (method_exists($class, 'getCacheProfile')) {
-                return call_user_func([$class, 'getCacheProfile'], $key);
+                return call_user_func(array($class, 'getCacheProfile'), $key);
             }
         }
 
