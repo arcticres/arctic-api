@@ -39,7 +39,7 @@ class Method
 		}
 		else {
 			$this->_model = $class_or_instance;
-			$this->_model_class = $class_or_instance;
+			$this->_model_class = get_class($class_or_instance);
 		}
 	}
 
