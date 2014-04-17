@@ -34,4 +34,12 @@ class Payment extends Model
     public function __construct() {
         parent::__construct();
     }
+
+    /**
+     * Prevent cache.
+     * @return bool
+     */
+    public static function getCacheProfile() {
+        return false;
+    }
 }

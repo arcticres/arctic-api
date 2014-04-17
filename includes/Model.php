@@ -9,7 +9,7 @@ namespace Arctic;
  * @method static static load($id)
  * @method bool insert()
  * @method bool update()
- * @method delete(Model $model)
+ * @method bool delete()
  */
 class Model
 {
