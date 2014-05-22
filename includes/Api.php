@@ -260,28 +260,80 @@ class Api
 			$opts['http']['header'] = $string;
 		}
 
-		// send request
+		// create context.. used for headers
 		$context = stream_context_create( $opts );
-		$raw_response = @file_get_contents( $url , false , $context );
 
-		// log it
-		$this->_log($method . ' ' . $url, $body, $raw_response);
+        // open file handle
+        $fh = @fopen($url, 'r', false, $context);
+        if (false === $fh) {
+            $this->raiseError('Request Failed', 'Unable to connect, connection reset or timed-out.');
+            return false;
+        }
 
-		// fail
-		if (false === $raw_response) {
-			$this->raiseError('Request Failed', 'Unable to connect, connection reset or timed-out.');
-			return false;
-		}
+        // get meta data
+        $meta_data = stream_get_meta_data($fh);
+
+        // has wrapper data
+        $response_headers = array();
+        if (isset($meta_data['wrapper_data']) && is_array($meta_data['wrapper_data'])) {
+            $response_headers = $meta_data['wrapper_data'];
+        }
+
+        // get status
+        $status = 200;
+        if (isset($response_headers[0])) {
+            if (preg_match('#^HTTP/\d+(|\.\d+) (\d{3})\D#i', $response_headers[0], $match)) {
+                $status = (int)$match[2];
+            }
+        }
+
+        // read raw response
+        $raw_response = stream_get_contents($fh);
+        fclose($fh);
+
+        // check raw response was read
+        if (false === $raw_response) {
+            $this->raiseError('Request Failed', 'Unable to read the content of the stream.');
+            return false;
+        }
+
+        // log it
+        $this->_log($method . ' ' . $url, $body, implode("\n", $response_headers) . "\n\n" . $raw_response);
+
+        // check status
+        if (200 > $status || 300 <= $status) {
+            // special status codes
+            if (403 === $status) {
+                $this->_clearToken();
+            }
+
+            // non  JSON response? just raise the error here
+            if ('{' !== $raw_response[0] || '[' !== $raw_response[0]) {
+                $this->raiseError('Unexpected Response: '.  $status, $raw_response);
+                return false;
+            }
+        }
 
 		// parse it
 		$parsed = @json_decode($raw_response,true);
-		if (false === $parsed) {
+		if (null === $parsed) {
 			$this->raiseError('Unable to Parse Response', json_last_error());
 			return false;
 		}
 
 		return $parsed;
 	}
+
+    private function _clearToken() {
+        // clear internal token
+        $this->_token = null;
+
+        // get cache key
+        $cache = 'token::' . $this->_getConfig('username');
+
+        // clear from cache
+        $this->getCacheManager()->remove($cache, null);
+    }
 
 	private function _getToken() {
 		// return token
