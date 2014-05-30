@@ -14,7 +14,7 @@ class Manager
      * used. isViableDefaultCacheType detects if the needed modules and extension are installed.
      * @var array
      */
-    private static $_POTENTIAL_DEFAULTS = ['Apc', 'XCache', 'Local'];
+    private static $_POTENTIAL_DEFAULTS = array('Apc', 'XCache', 'Local');
 
     /**
      * @var Cache
@@ -69,7 +69,7 @@ class Manager
                 }
                 
                 // if is viable default cache type?
-                if (call_user_func([$class, 'isViableDefaultCacheType'], $cache_config)) {
+                if (call_user_func(array($class, 'isViableDefaultCacheType'), $cache_config)) {
                     $cache_type = $class;
                     break;
                 }
