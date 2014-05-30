@@ -82,4 +82,8 @@ class Memcache implements Cache
     public function remove( $key ) {
         $this->_mc->delete($this->_prefix . $key);
     }
+
+    public static function isViableDefaultCacheType(array $config=null) {
+        return false;
+    }
 }

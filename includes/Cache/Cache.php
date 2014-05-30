@@ -51,4 +51,11 @@ interface Cache
      * @param string $key
      */
     public function remove( $key );
+
+    /**
+     * Whether or not this cache is a viable default type.
+     * @param array|null $config
+     * @return bool
+     */
+    public static function isViableDefaultCacheType(array $config=null);
 }

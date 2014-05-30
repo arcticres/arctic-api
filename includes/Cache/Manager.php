@@ -9,6 +9,14 @@ class Manager
     const DEFAULT_CACHE = 60;
 
     /**
+     * If no cache type is defined in the configuration, the manager will try the potential default cache
+     * types listed here (in order). The first one where isViableDefaultCacheType returns true will be
+     * used. isViableDefaultCacheType detects if the needed modules and extension are installed.
+     * @var array
+     */
+    private static $_POTENTIAL_DEFAULTS = ['Apc', 'XCache', 'Local'];
+
+    /**
      * @var Cache
      */
     private $_cache;
@@ -22,8 +30,23 @@ class Manager
 
     private $_next_force;
 
+    /**
+     * Register another potential default cache type. By default, it is inserted first in the list so it will be tried
+     * before other potential default cache types.
+     * @param string $type
+     * @param bool $insert_first
+     */
+    public static function registerPotentialDefaultCacheType($type, $insert_first=true) {
+        if ($insert_first) {
+            array_unshift(self::$_POTENTIAL_DEFAULTS, $type);
+        }
+        else {
+            array_push(self::$_POTENTIAL_DEFAULTS, $type);
+        }
+    }
+
     public function __construct($cache_type=null, array $cache_config=null) {
-        // allow condensed format [type=>"",...]
+        // allow condensed format [type => "", ...]
         if ( $cache_config === null && is_array( $cache_type ) ) {
             if (!isset($cache_config['type'])) throw new Exception('If a combined cache configuration is used, then it must have the key "type".');
             $cache_type = $cache_config['type'];
@@ -31,9 +54,26 @@ class Manager
 
         // detect caching?
         if ($cache_type === null) {
-            if (function_exists('apc_add')) $cache_type = __NAMESPACE__ . '\Apc';
-            elseif (function_exists('xcache_get')) $cache_type = __NAMESPACE__ . '\XCache';
-            else $cache_type = __NAMESPACE__ . '\Local';
+            // use one of the default caching tools...
+            foreach (self::$_POTENTIAL_DEFAULTS as $potential_cache_type) {
+                // get class name
+                if (class_exists($potential_cache_type)) {
+                    $class = $potential_cache_type;
+                }
+                elseif (false === strpos($potential_cache_type, '\\') && class_exists($class = __NAMESPACE__ . '\\' . $potential_cache_type)) {
+                    // inside local namespace (namespace prepended above)
+                }
+                else {
+                    // can not find class
+                    continue;
+                }
+                
+                // if is viable default cache type?
+                if (call_user_func([$class, 'isViableDefaultCacheType'], $cache_config)) {
+                    $cache_type = $class;
+                    break;
+                }
+            }
         }
 
         // no cache

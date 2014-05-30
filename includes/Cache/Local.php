@@ -36,4 +36,8 @@ class Local implements Cache
     public function remove( $key ) {
         unset($this->_data[$key]);
     }
+
+    public static function isViableDefaultCacheType(array $config=null) {
+        return true;
+    }
 }

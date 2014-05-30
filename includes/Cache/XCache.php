@@ -37,4 +37,8 @@ class XCache implements Cache
     public function remove( $key ) {
         xcache_unset($this->_prefix . $key);
     }
+
+    public static function isViableDefaultCacheType(array $config=null) {
+        return function_exists('xcache_get');
+    }
 }
