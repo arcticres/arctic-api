@@ -37,4 +37,8 @@ class Apc implements Cache
     public function remove( $key ) {
         apc_delete($this->_prefix . $key);
     }
+
+    public static function isViableDefaultCacheType(array $config=null) {
+        return function_exists('apc_add');
+    }
 }

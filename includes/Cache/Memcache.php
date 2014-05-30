@@ -17,14 +17,14 @@ class Memcache implements Cache
         if (!class_exists('Memcache')) return false;
 
         // default configuration
-        $default_config = [
+        $default_config = array(
             'host'      =>  '127.0.0.1',
             'port'      =>  11211,
             'compress'  =>  8192,
             'persistent'=>  true,
             'prefix'    =>  null,
             'timeout'   =>  null
-        ];
+        );
 
         // merge default configuration
         if ( $config ) $config = array_merge($default_config, $config);
@@ -51,7 +51,7 @@ class Memcache implements Cache
         }
 
         // register shut down
-        register_shutdown_function([$this, 'disconnect']);
+        register_shutdown_function(array($this, 'disconnect'));
 
         return true;
     }
@@ -81,5 +81,9 @@ class Memcache implements Cache
 
     public function remove( $key ) {
         $this->_mc->delete($this->_prefix . $key);
+    }
+
+    public static function isViableDefaultCacheType(array $config=null) {
+        return false;
     }
 }

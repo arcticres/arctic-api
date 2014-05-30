@@ -64,12 +64,14 @@ class Api
 
         // convert to file name
         $file_name  = '';
-        $namespace = '';
+
+        // has namespace?
         if ($last_ns_position = strrpos($class, '\\')) {
             $namespace = substr($class, 0, $last_ns_position);
             $class = substr($class, $last_ns_position + 1);
             $file_name  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
         }
+
         $file_name .= str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
 
         // add full path
@@ -145,7 +147,7 @@ class Api
         if (!isset($this->_cache_manager)) {
             $this->_cache_manager = new Cache\Manager(
                 $this->_getConfig('cache'),
-                $this->_getConfig('cache_config', ['prefix'=>$this->_getConfig('installation')])
+                $this->_getConfig('cache_config', array('prefix'=>$this->_getConfig('installation')))
             );
         }
 
@@ -212,7 +214,7 @@ class Api
 		);
 
 		// figure out protocol
-		$protocol = 'http' . ( $this->_getConfig('secure',true) ? 's' : '' );
+		$protocol = 'http' . ($this->_getConfig('secure', true) ? 's' : '');
 		$url = $protocol . '://' . $url;
 
 		// capitalize method name
@@ -220,7 +222,7 @@ class Api
 
 		// build header name
 		if ( $headers ) {
-			$headers = array_merge( $default_headers , $headers );
+			$headers = array_merge($default_headers, $headers);
 		}
 		else {
 			$headers = $default_headers;
@@ -237,10 +239,10 @@ class Api
 		);
 
 		// add content-type and request body
-		if ( $body ) {
-			$opts[ 'http' ][ 'content' ] = $body;
-			if ( !isset( $headers[ 'Content-type' ] ) ) {
-				if ( $body[0] === '{' || $body[0] === '[' ) {
+		if ($body) {
+			$opts['http']['content'] = $body;
+			if (!isset($headers[ 'Content-type'])) {
+				if ('{' === $body[0] || '[' === $body[0]) {
 					$headers['Content-type'] = 'application/json';
 				}
 				else {
@@ -250,43 +252,95 @@ class Api
 		}
 
 		// add headers
-		if ( $headers ) {
+		if ($headers) {
 			$string = '';
-			foreach ( $headers as $key => $val ) {
+			foreach ($headers as $key => $val) {
 				$string .= $key . ': ' . $val . "\r\n";
 			}
-			$opts[ 'http' ][ 'header' ] = $string;
+			$opts['http']['header'] = $string;
 		}
 
-		// send request
+		// create context.. used for headers
 		$context = stream_context_create( $opts );
-		$raw_response = file_get_contents( $url , false , $context );
 
-		// log it
-		$this->_log($method . ' ' . $url,$body,$raw_response);
+        // open file handle
+        $fh = @fopen($url, 'r', false, $context);
+        if (false === $fh) {
+            $this->raiseError('Request Failed', 'Unable to connect, connection reset or timed-out.');
+            return false;
+        }
 
-		// fail
-		if ( $raw_response === false ) {
-			$this->raiseError('Request Failed','Unable to connect, connection reset or timed-out.');
-			return false;
-		}
+        // get meta data
+        $meta_data = stream_get_meta_data($fh);
+
+        // has wrapper data
+        $response_headers = array();
+        if (isset($meta_data['wrapper_data']) && is_array($meta_data['wrapper_data'])) {
+            $response_headers = $meta_data['wrapper_data'];
+        }
+
+        // get status
+        $status = 200;
+        if (isset($response_headers[0])) {
+            if (preg_match('#^HTTP/\d+(|\.\d+) (\d{3})\D#i', $response_headers[0], $match)) {
+                $status = (int)$match[2];
+            }
+        }
+
+        // read raw response
+        $raw_response = stream_get_contents($fh);
+        fclose($fh);
+
+        // check raw response was read
+        if (false === $raw_response) {
+            $this->raiseError('Request Failed', 'Unable to read the content of the stream.');
+            return false;
+        }
+
+        // log it
+        $this->_log($method . ' ' . $url, $body, implode("\n", $response_headers) . "\n\n" . $raw_response);
+
+        // check status
+        if (200 > $status || 300 <= $status) {
+            // special status codes
+            if (403 === $status) {
+                $this->_clearToken();
+            }
+
+            // non  JSON response? just raise the error here
+            if ('{' !== $raw_response[0] || '[' !== $raw_response[0]) {
+                $this->raiseError('Unexpected Response: '.  $status, $raw_response);
+                return false;
+            }
+        }
 
 		// parse it
 		$parsed = @json_decode($raw_response,true);
-		if ( $parsed === false ) {
-			$this->raiseError('Unable to Parse Response',json_last_error());
+		if (null === $parsed) {
+			$this->raiseError('Unable to Parse Response', json_last_error());
 			return false;
 		}
 
 		return $parsed;
 	}
 
+    private function _clearToken() {
+        // clear internal token
+        $this->_token = null;
+
+        // get cache key
+        $cache = 'token::' . $this->_getConfig('username');
+
+        // clear from cache
+        $this->getCacheManager()->remove($cache, null);
+    }
+
 	private function _getToken() {
 		// return token
-		if ( isset( $this->_token ) ) return $this->_token;
+		if (isset($this->_token)) return $this->_token;
 
 		// allow hard coded tokens
-		if ( $token = $this->_getConfig( 'token' ) ) {
+		if ($token = $this->_getConfig('token')) {
 			return $this->_token = $token;
 		}
 
@@ -308,18 +362,18 @@ class Api
 
 		// build URL
 		$url = $this->_getConfig('host') . $this->_getConfig('api_path') . $this->_getConfig('auth_path');
-		$body = http_build_query( array_filter( $request ) );
+		$body = http_build_query(array_filter($request));
 
 		// send response
-		$response = $this->_sendRequest( $url , self::METHOD_POST , $body );
-		if ( $response === false ) return false;
+		$response = $this->_sendRequest($url, self::METHOD_POST, $body);
+		if (false === $response) return false;
 
 		// success!
-		if ( is_array( $response ) && isset( $response[ 'access_token' ] ) ) {
-            $this->_token = $response[ 'access_token' ];
+		if (is_array($response) && isset($response[ 'access_token'])) {
+            $this->_token = $response['access_token' ];
 
             // cache token
-            $this->getCacheManager()->set($cache, $this->_token, null , isset($response[ 'expires_in' ]) ? (int)$response[ 'expires_in' ] : null);
+            $this->getCacheManager()->set($cache, $this->_token, null, isset($response['expires_in']) ? (int)$response['expires_in'] : null);
 
 			return $this->_token;
 		}
@@ -345,14 +399,14 @@ class Api
 	public function sendAuthenticatedRequest( $api_path , $method=self::METHOD_GET , $body=null , array $headers=null ) {
 		// get token
 		$token = $this->_getToken();
-		if ( $token === false ) return false;
+		if (false === $token) return false;
 
 		// build url
 		$url = $this->_getConfig('host') . $this->_getConfig('api_path') . $api_path;
-		$headers = array_merge( (array)$headers , array(
+		$headers = array_merge((array)$headers, array(
 			'Authorization'    =>  'Bearer ' . $token
 		));
 
-		return $this->_sendRequest( $url , $method , $body , $headers );
+		return $this->_sendRequest($url, $method, $body, $headers);
 	}
 }

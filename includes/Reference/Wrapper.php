@@ -147,7 +147,7 @@ class Wrapper
 
         if ( !$this->_model ) throw new \BadMethodCallException( 'Unable to call "' . $name . '" on undefined object.' );
 
-		return $this->_model->__call( $name , $arguments );
+		return call_user_func_array(array($this->_model, $name), $arguments);
 	}
 
     /**
