@@ -209,7 +209,6 @@ class Api
 
 	private function _sendRequest( $url , $method=self::METHOD_GET , $body=null , array $headers=null ) {
 		$default_headers = array(
-			'User-Agent'    =>  'ArcticAPI/' . self::VERSION,
 			'Accepts'       =>  'application/json'
 		);
 
@@ -228,77 +227,70 @@ class Api
 			$headers = $default_headers;
 		}
 
-		// build options
-		$opts = array(
-			'http' => array(
-				'method' => $method ,
-				'max_redirects' => 0 ,
-				'timeout' => $this->_getConfig('timeout',10),
-				'ignore_errors' => true
-			)
-		);
-
-		// add content-type and request body
-		if ($body) {
-			$opts['http']['content'] = $body;
-			if (!isset($headers[ 'Content-type'])) {
-				if ('{' === $body[0] || '[' === $body[0]) {
-					$headers['Content-type'] = 'application/json';
-				}
-				else {
-					$headers['Content-type'] = 'application/x-www-form-urlencoded';
-				}
-			}
-		}
-
-		// add headers
-		if ($headers) {
-			$string = '';
-			foreach ($headers as $key => $val) {
-				$string .= $key . ': ' . $val . "\r\n";
-			}
-			$opts['http']['header'] = $string;
-		}
-
-		// create context.. used for headers
-		$context = stream_context_create( $opts );
-
-        // open file handle
-        $fh = @fopen($url, 'r', false, $context);
-        if (false === $fh) {
-            $this->raiseError('Request Failed', 'Unable to connect, connection reset or timed-out.');
-            return false;
-        }
-
-        // get meta data
-        $meta_data = stream_get_meta_data($fh);
-
-        // has wrapper data
-        $response_headers = array();
-        if (isset($meta_data['wrapper_data']) && is_array($meta_data['wrapper_data'])) {
-            $response_headers = $meta_data['wrapper_data'];
-        }
-
-        // get status
-        $status = 200;
-        if (isset($response_headers[0])) {
-            if (preg_match('#^HTTP/\d+(|\.\d+) (\d{3})\D#i', $response_headers[0], $match)) {
-                $status = (int)$match[2];
+        // add content-type
+        if ($body && !isset($headers[ 'Content-type'])) {
+            if ('{' === $body[0] || '[' === $body[0]) {
+                $headers['Content-type'] = 'application/json';
+            }
+            else {
+                $headers['Content-type'] = 'application/x-www-form-urlencoded';
             }
         }
 
-        // read raw response
-        $raw_response = stream_get_contents($fh);
-        fclose($fh);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->_getConfig('timeout',10));
+        curl_setopt($ch, CURLOPT_USERAGENT, 'ArcticAPI/' . self::VERSION);
 
-        // check raw response was read
-        if (false === $raw_response) {
-            $this->raiseError('Request Failed', 'Unable to read the content of the stream.');
+        // set headers
+        if ($headers) {
+            $request_headers = array();
+            foreach ($headers as $key => $val) {
+                $request_headers[] = sprintf('%s: %s', $key, $val);
+            }
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
+        }
+
+        // add body
+        if ($body) {
+            // security safeguard
+            if ('@' === $body[0]) {
+                $this->raiseError('Bad Request', 'Invalid request body.');
+                return false;
+            }
+
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+        }
+
+        // exec
+        $data = curl_exec($ch);
+
+        // curl error
+        if (false === $data) {
+            // get error
+            $error = curl_error($ch);
+
+            // close
+            curl_close($ch);
+
+            // raise error
+            $this->raiseError('Request Failed', 'Unable to connect: ' . $error . '.');
             return false;
         }
 
+        // get status
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        // close
+        curl_close($ch);
+
+        // explode
+        list($raw_headers, $raw_response) = explode("\r\n\r\n", $data, 2);
+
         // log it
-        $this->_log($method . ' ' . $url, $body, implode("\n", $response_headers) . "\n\n" . $raw_response);
+        $this->_log($method . ' ' . $url, $body, $raw_headers . "\n\n" . $raw_response);
 
         // check status
         if (200 > $status || 300 <= $status) {
@@ -308,7 +300,7 @@ class Api
             }
 
             // non  JSON response? just raise the error here
-            if ('{' !== $raw_response[0] || '[' !== $raw_response[0]) {
+            if ('{' !== $raw_response[0] && '[' !== $raw_response[0]) {
                 $this->raiseError('Unexpected Response: '.  $status, $raw_response);
                 return false;
             }
