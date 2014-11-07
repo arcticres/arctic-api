@@ -1,6 +1,6 @@
 <?php
 
-namespace Arctic\Inquiry;
+namespace Arctic\Model\Inquiry;
 
 use Arctic\Model;
 
