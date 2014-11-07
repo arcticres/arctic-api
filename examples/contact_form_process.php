@@ -74,7 +74,7 @@ $person->notes[] = $note;
 
 // insert both the person and any new references
 if ( $person->insert() ) {
-    $inquiry = new \Arctic\Inquiry\Inquiry();
+    $inquiry = new \Arctic\Model\Inquiry\Inquiry();
     $inquiry->personid = $person->id;
     $inquiry->mode = 'Online Form';
     $inquiry->notes = $_POST[ 'message' ];
