@@ -28,15 +28,15 @@ class Api
 	const METHOD_DELETE = 'DELETE';
 
 	private static $_instance;
-    private static $_last_error;
+	private static $_last_error;
 
 	private $_config;
 	private $_token;
 
-    /**
-     * @var Cache\Manager
-     */
-    private $_cache_manager;
+	/**
+	 * @var Cache\Manager
+	 */
+	private $_cache_manager;
 
 	private function __construct() {
 	}
@@ -56,29 +56,29 @@ class Api
 	}
 
 	public static function autoloadClass($class) {
-        $class = ltrim($class, '\\');
+		$class = ltrim($class, '\\');
 
-        // only process "Arctic\" vendor code
-        if ( substr( $class , 0 , 7 ) !== 'Arctic\\' ) return;
-        $class = substr( $class , 7 );
+		// only process "Arctic\" vendor code
+		if ( substr( $class , 0 , 7 ) !== 'Arctic\\' ) return;
+		$class = substr( $class , 7 );
 
-        // convert to file name
-        $file_name  = '';
+		// convert to file name
+		$file_name  = '';
 
-        // has namespace?
-        if ($last_ns_position = strrpos($class, '\\')) {
-            $namespace = substr($class, 0, $last_ns_position);
-            $class = substr($class, $last_ns_position + 1);
-            $file_name  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
-        }
+		// has namespace?
+		if ($last_ns_position = strrpos($class, '\\')) {
+			$namespace = substr($class, 0, $last_ns_position);
+			$class = substr($class, $last_ns_position + 1);
+			$file_name  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+		}
 
-        $file_name .= str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
+		$file_name .= str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
 
-        // add full path
-        $file_name = __DIR__ . DIRECTORY_SEPARATOR . $file_name;
+		// add full path
+		$file_name = __DIR__ . DIRECTORY_SEPARATOR . $file_name;
 
-        // if found, load
-        if ( file_exists($file_name) ) require $file_name;
+		// if found, load
+		if ( file_exists($file_name) ) require $file_name;
 	}
 
 	protected function _setConfiguration( $config ) {
@@ -107,7 +107,7 @@ class Api
 			'auth_path'     =>  'oauth/application/token',
 			'secure'        =>  true,
 			'errors'        =>  self::ERRORS_EXCEPTION,
-            'autoload'      =>  null,
+			'autoload'      =>  null,
 			'sign'          =>  null
 		);
 
@@ -117,50 +117,50 @@ class Api
 
 		// assemble host
 		if ( !isset( $config[ 'host' ] ) ) {
-            $config[ 'host' ] = $installation_name . '.arcticres.com';
-        }
+			$config[ 'host' ] = $installation_name . '.arcticres.com';
+		}
 
-        // get instance
-        $instance = self::getInstance();
+		// get instance
+		$instance = self::getInstance();
 
 		// store configuration
 		$instance->_setConfiguration($config);
 
-        // determine if autoloader is needed
-        $need_autoload = $instance->_getConfig('autoload');
-        if ( $need_autoload === null ) {
-            // try to autoload base model to determine if an autoloader is needed
-            $need_autoload = !class_exists( __NAMESPACE__ . '\Model' , true );
-        }
+		// determine if autoloader is needed
+		$need_autoload = $instance->_getConfig('autoload');
+		if ( $need_autoload === null ) {
+			// try to autoload base model to determine if an autoloader is needed
+			$need_autoload = !class_exists( __NAMESPACE__ . '\Model' , true );
+		}
 
-        // if need autoloader, register it
-        if ( $need_autoload ) {
-            spl_autoload_register(__CLASS__ . '::autoloadClass');
-        }
+		// if need autoloader, register it
+		if ( $need_autoload ) {
+			spl_autoload_register(__CLASS__ . '::autoloadClass');
+		}
 	}
 
-    /**
-     * @return Cache\Manager
-     */
-    public function getCacheManager() {
-        // initiate cache manager
-        if (!isset($this->_cache_manager)) {
-            $this->_cache_manager = new Cache\Manager(
-                $this->_getConfig('cache'),
-                $this->_getConfig('cache_config', array('prefix'=>$this->_getConfig('installation')))
-            );
-        }
+	/**
+	 * @return Cache\Manager
+	 */
+	public function getCacheManager() {
+		// initiate cache manager
+		if (!isset($this->_cache_manager)) {
+			$this->_cache_manager = new Cache\Manager(
+				$this->_getConfig('cache'),
+				$this->_getConfig('cache_config', array('prefix'=>$this->_getConfig('installation')))
+			);
+		}
 
-        return $this->_cache_manager;
-    }
+		return $this->_cache_manager;
+	}
 
 //	private function _signRequest( $url , $method , $body=null ) {
 //		//if ( $body ) return hash_hmac('sha256',$body,)
 //	}
 
 	public function raiseError($error_name,$error_description) {
-        // store last error
-        self::$_last_error = sprintf('%s: %s',$error_name,$error_description);
+		// store last error
+		self::$_last_error = sprintf('%s: %s',$error_name,$error_description);
 
 		switch ( isset( $this->_config ) && isset( $this->_config[ 'errors' ] ) ? $this->_config[ 'errors' ] : self::ERRORS_EXCEPTION ) {
 			case self::ERRORS_EXCEPTION:
@@ -178,13 +178,13 @@ class Api
 		}
 	}
 
-    /**
-     * Get the last error raised by the API call.
-     * @return string|null
-     */
-    public static function getLastError() {
-        return self::$_last_error;
-    }
+	/**
+	 * Get the last error raised by the API call.
+	 * @return string|null
+	 */
+	public static function getLastError() {
+		return self::$_last_error;
+	}
 
 	private function _log($request,$body,$response) {
 		if ( $this->_getConfig('debug') ) {
@@ -227,84 +227,84 @@ class Api
 			$headers = $default_headers;
 		}
 
-        // add content-type
-        if ($body && !isset($headers[ 'Content-type'])) {
-            if ('{' === $body[0] || '[' === $body[0]) {
-                $headers['Content-type'] = 'application/json';
-            }
-            else {
-                $headers['Content-type'] = 'application/x-www-form-urlencoded';
-            }
-        }
+		// add content-type
+		if ($body && !isset($headers[ 'Content-type'])) {
+			if ('{' === $body[0] || '[' === $body[0]) {
+				$headers['Content-type'] = 'application/json';
+			}
+			else {
+				$headers['Content-type'] = 'application/x-www-form-urlencoded';
+			}
+		}
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $this->_getConfig('timeout',10));
-        curl_setopt($ch, CURLOPT_USERAGENT, 'ArcticAPI/' . self::VERSION);
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, $this->_getConfig('timeout',10));
+		curl_setopt($ch, CURLOPT_USERAGENT, 'ArcticAPI/' . self::VERSION);
 
-        // set headers
-        if ($headers) {
-            $request_headers = array();
-            foreach ($headers as $key => $val) {
-                $request_headers[] = sprintf('%s: %s', $key, $val);
-            }
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
-        }
+		// set headers
+		if ($headers) {
+			$request_headers = array();
+			foreach ($headers as $key => $val) {
+				$request_headers[] = sprintf('%s: %s', $key, $val);
+			}
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
+		}
 
-        // add body
-        if ($body) {
-            // security safeguard
-            if ('@' === $body[0]) {
-                $this->raiseError('Bad Request', 'Invalid request body.');
-                return false;
-            }
+		// add body
+		if ($body) {
+			// security safeguard
+			if ('@' === $body[0]) {
+				$this->raiseError('Bad Request', 'Invalid request body.');
+				return false;
+			}
 
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-        }
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+		}
 
-        // exec
-        $data = curl_exec($ch);
+		// exec
+		$data = curl_exec($ch);
 
-        // curl error
-        if (false === $data) {
-            // get error
-            $error = curl_error($ch);
+		// curl error
+		if (false === $data) {
+			// get error
+			$error = curl_error($ch);
 
-            // close
-            curl_close($ch);
+			// close
+			curl_close($ch);
 
-            // raise error
-            $this->raiseError('Request Failed', 'Unable to connect: ' . $error . '.');
-            return false;
-        }
+			// raise error
+			$this->raiseError('Request Failed', 'Unable to connect: ' . $error . '.');
+			return false;
+		}
 
-        // get status
-        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		// get status
+		$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        // close
-        curl_close($ch);
+		// close
+		curl_close($ch);
 
-        // explode
-        list($raw_headers, $raw_response) = explode("\r\n\r\n", $data, 2);
+		// explode
+		list($raw_headers, $raw_response) = explode("\r\n\r\n", $data, 2);
 
-        // log it
-        $this->_log($method . ' ' . $url, $body, $raw_headers . "\n\n" . $raw_response);
+		// log it
+		$this->_log($method . ' ' . $url, $body, $raw_headers . "\n\n" . $raw_response);
 
-        // check status
-        if (200 > $status || 300 <= $status) {
-            // special status codes
-            if (403 === $status) {
-                $this->_clearToken();
-            }
+		// check status
+		if (200 > $status || 300 <= $status) {
+			// special status codes
+			if (403 === $status) {
+				$this->_clearToken();
+			}
 
-            // non  JSON response? just raise the error here
-            if ('{' !== $raw_response[0] && '[' !== $raw_response[0]) {
-                $this->raiseError('Unexpected Response: '.  $status, $raw_response);
-                return false;
-            }
-        }
+			// non  JSON response? just raise the error here
+			if ('{' !== $raw_response[0] && '[' !== $raw_response[0]) {
+				$this->raiseError('Unexpected Response: '.  $status, $raw_response);
+				return false;
+			}
+		}
 
 		// parse it
 		$parsed = @json_decode($raw_response,true);
@@ -316,16 +316,16 @@ class Api
 		return $parsed;
 	}
 
-    private function _clearToken() {
-        // clear internal token
-        $this->_token = null;
+	private function _clearToken() {
+		// clear internal token
+		$this->_token = null;
 
-        // get cache key
-        $cache = 'token::' . $this->_getConfig('username');
+		// get cache key
+		$cache = 'token::' . $this->_getConfig('username');
 
-        // clear from cache
-        $this->getCacheManager()->remove($cache, null);
-    }
+		// clear from cache
+		$this->getCacheManager()->remove($cache, null);
+	}
 
 	private function _getToken() {
 		// return token
@@ -336,11 +336,11 @@ class Api
 			return $this->_token = $token;
 		}
 
-        // use cache
-        $cache = 'token::' . $this->_getConfig('username');
-        if ($token = $this->getCacheManager()->get($cache)) {
-            return $this->_token = $token;
-        }
+		// use cache
+		$cache = 'token::' . $this->_getConfig('username');
+		if ($token = $this->getCacheManager()->get($cache)) {
+			return $this->_token = $token;
+		}
 
 		// fetch token
 		$request = array(
@@ -362,10 +362,10 @@ class Api
 
 		// success!
 		if (is_array($response) && isset($response[ 'access_token'])) {
-            $this->_token = $response['access_token' ];
+			$this->_token = $response['access_token' ];
 
-            // cache token
-            $this->getCacheManager()->set($cache, $this->_token, null, isset($response['expires_in']) ? (int)$response['expires_in'] : null);
+			// cache token
+			$this->getCacheManager()->set($cache, $this->_token, null, isset($response['expires_in']) ? (int)$response['expires_in'] : null);
 
 			return $this->_token;
 		}
@@ -381,12 +381,12 @@ class Api
 		return false;
 	}
 
-    public function sendRequest( $api_path , $method=self::METHOD_GET , $body=null , array $headers=null ) {
-        // build url
-        $url = $this->_getConfig('host') . $this->_getConfig('api_path') . $api_path;
+	public function sendRequest( $api_path , $method=self::METHOD_GET , $body=null , array $headers=null ) {
+		// build url
+		$url = $this->_getConfig('host') . $this->_getConfig('api_path') . $api_path;
 
-        return $this->_sendRequest( $url , $method , $body , $headers );
-    }
+		return $this->_sendRequest( $url , $method , $body , $headers );
+	}
 
 	public function sendAuthenticatedRequest( $api_path , $method=self::METHOD_GET , $body=null , array $headers=null ) {
 		// get token
