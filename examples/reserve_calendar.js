@@ -29,8 +29,9 @@ $(function() {
 	});
 
 	// populate calendar
+	var _calendarRequest = 0;
 	function _getCalendarEvents(start, end, tz, callback) {
-		var guest_count = parseInt($("#guests").val(), 10);
+		var guest_count = parseInt($("#guests").val(), 10), req = ++_calendarRequest;
 
 		if (!(guest_count > 0))
 			guest_count = null;
@@ -79,6 +80,12 @@ $(function() {
 				});
 			});
 
+			// only draw legend if current request
+			if (_calendarRequest === req) {
+				$("#legend").html(legend.join(""))[0 === legend.length ? "hide" : "show"]();
+			}
+
+			// update calendar
 			callback(events);
 		}, function(err) {
 			// run callback
