@@ -2,7 +2,7 @@
     "name": "arctic/arctic2api",
     "type": "library",
     "description": "API for interacting with Arctic Reservations version 2",
-    "homepage": "https://github.com/nathanntg/arctic-php-api",
+    "homepage": "https://github.com/nathanntg/arctic-api",
     "license": "MIT",
     "authors": [
         {
