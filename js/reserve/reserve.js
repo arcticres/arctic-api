@@ -273,7 +273,7 @@
 				// add field
 				code = options.templates.field({
 					label: el.nm,
-					id: el.id,
+					id: prefix + el.id,
 					help: (el.set && el.desc ? el.desc : null),
                     image: el.img,
                     image_url: el.img ? t.getImageUrl(el.img) : "",
