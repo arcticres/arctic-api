@@ -24,6 +24,26 @@ $(function() {
 		$("body").animate({scrollTop: $(el).offset().top - 20});
 	}
 
+	function _getBrightness(color) {
+		var red, green, blue;
+
+		if (7 === color.length) {
+			red = parseInt(color.substr(1, 2), 16);
+			green = parseInt(color.substr(3, 2), 16);
+			blue = parseInt(color.substr(5, 2), 16);
+		}
+		else if (4 === color.length) {
+			red = parseInt(color.charAt(1), 16);
+			green = parseInt(color.charAt(2), 16);
+			blue = parseInt(color.charAt(3), 16);
+		}
+		else {
+			return 0;
+		}
+
+		return ( ( red * 299) + ( green * 587) + ( blue * 114 ) ) / 1000;
+	}
+
 	// MAIN CODE
 	// create widget
 	var w = new ArcticReserveWidget({
@@ -47,7 +67,8 @@ $(function() {
 			var events = [], legend = [];
 
 			$.each(data, function(i, group) {
-				var group_color = group.results[0].color;
+				var group_color = group.results[0].color,
+					group_text = (_getBrightness(group_color) >= 128 ? '#000000' : '#ffffff');
 
 				// add to legend
 				legend.push('<div><span class="swatch" style="background-color:' + group_color + ';"></span> ' + _escape(group.name) + '</div>');
@@ -74,6 +95,7 @@ $(function() {
 					}
 					else {
 						event.color = group_color;
+						event.textColor = group_text;
 						event.className = 'trip-reserve';
 						event.url = result.reserve_url;
 					}

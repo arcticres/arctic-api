@@ -284,7 +284,8 @@
 				if (el.set) {
 					sets[el.set] = ( sets[el.set] || options.templates.bookAddOnGroupHeader({
 						name: el.set,
-						description: null
+						description: null,
+						other: false
 					}) ) + code;
 				}
 				else {
