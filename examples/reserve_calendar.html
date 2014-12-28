@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Trip Calendar</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    <!-- momment is required for fullcalendar and date math -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+
+    <!-- fullcalendar provides the calendar layout -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.2.3/fullcalendar.min.js"></script>
+
+    <!-- bootstrap js provides a tooltip utility -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+    <!-- Arctic Reserve Widget -->
+    <script src="../js/reserve/reserve.js"></script>
+
+    <!-- specific calendar implementation -->
+    <script src="reserve_calendar.js"></script>
+    <link href="reserve_calendar.css" rel="stylesheet">
+
+    <!-- fullcalendar styling -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.2.3/fullcalendar.min.css" rel="stylesheet">
+
+    <!-- boot strap for formatting purposes -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/css/bootstrap-theme.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container" role="main">
+    <h1>Trip Calendar</h1>
+    <p>This example shows a more complete, polished booking interface that uses
+        <a href="http://fullcalendar.io/">FullCalendar</a> to layout trips in a monthly calendar interface view, showing
+        a simple legend and a booking form upon clicking eligible trips.</p>
+    <form method="get" id="filter-guests">
+        <label for="guests">Guests:</label>
+        <input type="number" name="guests" id="guests" value="" min="1" size="3" maxlength="3" step="1">
+        <button type="submit">Filter Availability</button>
+    </form>
+    <div id="calendar">
+
+    </div>
+    <div id="legend">
+
+    </div>
+    <div id="book">
+
+    </div>
+</div>
+</body>
+</html>

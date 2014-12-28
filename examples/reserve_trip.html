@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trip Table</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="../js/reserve/reserve.js"></script>
+    <script src="reserve_trip.js"></script>
+</head>
+<body>
+<h1>Upcoming Trips</h1>
+<p>This example uses a query in the fetch function to only select a specific trip.</p>
+<pre>
+w.fetch({
+	query: "triptypeid = 1 LIMIT 100", // fetch results using a query
+	grouped: false // disable grouping
+}, function(data) {
+    // success function
+});
+</pre>
+<hr>
+<div id="results">
+
+</div>
+<div id="book">
+
+</div>
+</body>
+</html>
