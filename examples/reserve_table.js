@@ -67,6 +67,7 @@ w.fetch({
 		});
 	}, function(err) {
 		// show error message
+		$('<div class="error"><p><strong>Error.</strong> Unable to fetch trip dates.</p></div>').appendTo("#results");
 	});
 
 

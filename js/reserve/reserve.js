@@ -138,13 +138,20 @@
             }, callback);
         };
 
+        function _getBaseUrl() {
+            if (options.gfsDomain) {
+                return (options.useSsl ? "https://" : "http://") + options.gfsDomain;
+            }
+            return "";
+        }
+
         this.fetch = function (opts, callback, err_callback) {
             // opts: start (default: empty), end (default: empty), query (default: empty),
             //       from (default: 0), limit (default: 100), web_name (default: empty),
-            //       grouped (default: true), multi (default: false), success (instead of callback),
-            //       error (instead of err_callback)
+            //       group (default: true), guests (default: empty), multi (default: false),
+            //       success (instead of callback), error (instead of err_callback)
 
-            var url = (options.useSsl ? "https://" : "http://") + options.gfsDomain + "/reserve/api", get_params = {}, cur_req;
+            var url = _getBaseUrl() + "/reserve/api", get_params = {}, cur_req;
 
             // add web_name
             if (opts.web_name) {
@@ -152,8 +159,8 @@
             }
 
             // add get_params
-            $.each(["start", "end", "query", "from", "limit", "grouped"], function (k, v) {
-                if (opts[v]) {
+            $.each(["start", "end", "query", "from", "limit", "group", "guests"], function (k, v) {
+                if (v in opts) {
                     get_params[v] = opts[v];
                 }
             });
@@ -211,7 +218,7 @@
         };
 
         this.checkAvailability = function (result, guests, callback) {
-            var url = (options.useSsl ? "https://" : "http://") + options.gfsDomain + "/reserve/api/check/", get_params = {guests: guests};
+            var url = _getBaseUrl() + "/reserve/api/check/", get_params = {guests: guests};
 
             // add trip id
             if (result.id) {
