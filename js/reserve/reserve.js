@@ -18,6 +18,7 @@
 
     var defaults = {
         gfsDomain: '', // REQUIRED; e.g., reservations.raftingcompany.com
+        useSsl: true, // for debugging purposes only (all gfs require SSL)
         showAvailability: true,
         templates: {
             field: function (obj) {
@@ -26,7 +27,7 @@
             },
             bookForm: function (obj) {
                 // <div class="book-form"><form action="<%- url %>" method="post"><%= details %><%= fields %><div class="form-actions><button type="submit" autocomplete="off">Next</button></div></form></div>
-                return '<div class="book-form"><form action="' + _escape.obj(url) + '" method="post">' + obj.details + obj.fields + '<div class="form-actions"><button type="submit" autocomplete="off">Next</button></div>div></form></div>';
+                return '<div class="book-form"><form action="' + _escape(obj.url) + '" method="post">' + obj.details + obj.fields + '<div class="form-actions"><button type="submit" autocomplete="off">Next</button></div></form></div>';
             },
             bookAddOnHeader: function (obj) {
                 // <% if (description) { %><p><%- description %></p><% } %>
@@ -113,6 +114,11 @@
     function widget(instance_options) {
         var options = $.extend(true, {}, defaults, instance_options), req, t = this;
 
+        // allows use of the reserve widget on the guest-facing site without resorting to JSONP
+        function _useJsonp() {
+            return (location.host !== options.gfsDomain);
+        }
+
         this.fetchLandingPage = function (web_name, callback) {
             return this.fetch({
                 web_name: web_name
@@ -138,7 +144,7 @@
             //       grouped (default: true), multi (default: false), success (instead of callback),
             //       error (instead of err_callback)
 
-            var url = "https://" + options.gfsDomain + "/reserve/api", get_params = {}, cur_req;
+            var url = (options.useSsl ? "https://" : "http://") + options.gfsDomain + "/reserve/api", get_params = {}, cur_req;
 
             // add web_name
             if (opts.web_name) {
@@ -171,7 +177,7 @@
             // run query
             cur_req = $.ajax({
                 cache: true,
-                dataType: "jsonp",
+                dataType: (_useJsonp() ? "jsonp" : "json"),
                 url: url,
                 data: get_params
             }).done(function (data) {
@@ -205,7 +211,7 @@
         };
 
         this.checkAvailability = function (result, guests, callback) {
-            var url = "https://" + options.gfsDomain + "/reserve/api/check/", get_params = {guests: guests};
+            var url = (options.useSsl ? "https://" : "http://") + options.gfsDomain + "/reserve/api/check/", get_params = {guests: guests};
 
             // add trip id
             if (result.id) {
@@ -217,7 +223,7 @@
 
             return $.ajax({
                 cache: true,
-                dataType: "jsonp",
+                dataType: (_useJsonp() ? "jsonp" : "json"),
                 url: url,
                 data: get_params
             }).success(function (data) {
@@ -240,7 +246,8 @@
                     code = options.templates.bookAddOnReservation({
                         id: el.id,
                         has: (el.def ? true : false),
-                        amount: el.amnt
+                        amount: el.amnt,
+                        def: ':pl' !== el.set && el.def
                     });
                 }
                 else {
@@ -248,7 +255,8 @@
                         id: el.id,
                         has: (el.def && guests ? guests : 0),
                         step: (el.div || 1),
-                        amount: el.amnt
+                        amount: el.amnt,
+                        def: ':pl' !== el.set && el.def
                     });
                 }
 
@@ -278,7 +286,8 @@
             if (other) {
                 other = options.templates.bookAddOnGroupHeader({
                     name: "Additional Options",
-                    description: null
+                    description: null,
+                    other: true
                 }) + other + options.templates.bookAddOnGroupFooter({
                     set: null
                 });
@@ -302,7 +311,7 @@
             return options.templates.bookForm({
                 fields: _buildBookFields(result.pricing, guests),
                 url: result.reserve_url,
-                details: result.details
+                details: result.details||""
             });
         };
 
@@ -400,7 +409,7 @@
 
         function _adjustGuestCount(result, ev) {
             // get delta
-            var new_total = _totalInputs(ev.target, ".pricing-levels"), delta = (new_total - _total_guest_count);
+            var new_total = _totalInputs($(ev.target).closest(".pricing-levels")), delta = (new_total - _total_guest_count);
 
             // look for defaults
             var bf = $(ev.target).closest("form");
@@ -416,6 +425,7 @@
             // adjust defaults
             bf.find("input[data-isdefault]").each(function () {
                 var $this = $(this), cur_val = ( parseInt($this.val(), 10) || 0 );
+
                 if (delta > 0) {
                     // adjust default
                     $this.val(cur_val + delta).trigger($.Event("autoadjust", {
@@ -427,6 +437,7 @@
                 else if (delta < 0) {
                     // adjust downward, if there are more than the total
                     var $set = $this.closest(".addons");
+                    console.log(cur_val, new_total, this);
                     if ($set.hasClass("addon-other")) {
                         // adjust downward
                         if (cur_val > new_total) {
@@ -438,7 +449,7 @@
                         }
                     }
                     else {
-                        var set_total = _totalInputs($(ev.target).closest(".addons")), new_val;
+                        var set_total = _totalInputs($set), new_val;
                         if (set_total > new_total) {
                             new_val = cur_val - ( set_total - new_total );
                             if (new_val < 0) {
@@ -464,7 +475,7 @@
             $el = $(html);
 
             // add events
-            $el.find(".pricing-levels").on("focus", _getGuestCount).on("blur", function(ev) {
+            $el.find(".pricing-levels input").on("focus", _getGuestCount).on("blur", function(ev) {
                 _adjustGuestCount(result, ev);
             });
 
