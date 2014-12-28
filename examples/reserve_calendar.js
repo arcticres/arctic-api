@@ -1,4 +1,6 @@
 $(function() {
+	"use strict";
+
 	// UTILITIES
 	var _escapeMap = {
 		'&': '&amp;',
@@ -107,11 +109,16 @@ $(function() {
 		defaultView: "month",
 		eventClick:function(event){
 			if (event.result && 2 === event.result.action) {
+				// prefill guest count
+				var guests = parseInt($("#guests").val(), 10);
+				if (!(guests > 0))
+					guests = null;
+
 				// empty booking form
 				$("#book").empty().append('<h2>Make Reservation</h2>');
 
 				// make booking form
-				w.buildBookFormElement(event.result).appendTo("#book");
+				w.buildBookFormElement(event.result, guests).appendTo("#book");
 
 				// scroll to booking form
 				_scrollToElement("#book");
