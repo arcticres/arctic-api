@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trip Table</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="../js/reserve/reserve.js"></script>
+    <script src="reserve_table.js"></script>
+</head>
+<body>
+<h1>Upcoming Trips</h1>
+<p>This example fetches a list of upcoming trips much like the standard list-based booking interface, and prints
+them grouped by trip type (or whatever grouping mechanism is used on the specified installation). The example includes
+a JavaScript booking interface to begin the booking process as well.</p>
+<p>The example code shows how to configure the Arctic reserve widget:</p>
+<pre>
+// create widget
+var w = new ArcticReserveWidget({
+	gfsDomain: "reservations.theraftingcompany.com"
+});
+</pre>
+<p>Then to fetch the standard grouped results (the default results shown on the booking page):</p>
+<pre>
+// fetch all upcoming trips
+w.fetch({
+    // no parameters, returns same list of trips shown on general booking page
+}, function(data) {
+    // success function (layout html)
+}, function(err) {
+    // failure function (show error message)
+});
+</pre>
+<p>When a user clicks the reserve button, the booking form is shown by:</p>
+<pre>
+// result must contain one of the results returned by the booking widget
+var result;
+
+// make booking form
+w.buildBookFormElement(result).appendTo("#book");
+</pre>
+<hr>
+<div id="results">
+
+</div>
+<div id="book">
+
+</div>
+</body>
+</html>

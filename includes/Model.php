@@ -46,11 +46,11 @@ class Model
 		return strtolower( $class );
 	}
 
-    /**
-     * @internal
-     * @return string
-     */
-    public static function getRelativeApiPath() {
+	/**
+	 * @internal
+	 * @return string
+	 */
+	public static function getRelativeApiPath() {
 		if ( isset( self::$_relative_api_path ) ) {
 			$ret = self::$_relative_api_path;
 			self::$_relative_api_path = null;;
@@ -63,7 +63,7 @@ class Model
 	/**
 	 * Static calls do not have a parent reference context. This is used to temporarily force a context. It will only
 	 * apply to the next static call.
-     * @internal
+	 * @internal
 	 * @param $api
 	 */
 	public static function forceRelativeApiPath( $api ) {
@@ -134,7 +134,7 @@ class Model
 	 */
 	protected function _addSingleReference( $name , $class , array $mapping=null ) {
 		$this->_reference_definitions[ $name ] = new Reference\Definition(
-            Reference\Definition::TYPE_SINGLE ,
+			Reference\Definition::TYPE_SINGLE ,
 			$name ,
 			$class ,
 			null ,
@@ -189,19 +189,19 @@ class Model
 		return $this->_id;
 	}
 
-    /**
-     * Get an array representation of the object (does not include references).
-     * @return array
-     */
-    public function toArray() {
+	/**
+	 * Get an array representation of the object (does not include references).
+	 * @return array
+	 */
+	public function toArray() {
 		return array_merge( $this->_data , $this->_new_data );
 	}
 
-    /**
-     * Return changes that are pending and will be saved or inserted.
-     * @return array
-     */
-    public function delta() {
+	/**
+	 * Return changes that are pending and will be saved or inserted.
+	 * @return array
+	 */
+	public function delta() {
 		$ret = array();
 		foreach ( $this->_new_data as $key => $new ) {
 			$old = ( isset( $this->_data[ $key ] ) ? $this->_data[ $key ] : null );
@@ -211,7 +211,7 @@ class Model
 	}
 
 	/**
-     * Get all reference definitions.
+	 * Get all reference definitions.
 	 * @return Reference\Definition[]
 	 */
 	public function getReferenceDefinitions() {
@@ -219,20 +219,20 @@ class Model
 	}
 
 	/**
-     * Get all references.
+	 * Get all references.
 	 * @return array
 	 */
 	public function getReferences() {
 		return $this->_references;
 	}
 
-    /**
-     * @param string $method
-     * @param array $arguments
-     * @return mixed
-     * @throws \BadMethodCallException
-     */
-    public function __call( $method , $arguments ) {
+	/**
+	 * @param string $method
+	 * @param array $arguments
+	 * @return mixed
+	 * @throws \BadMethodCallException
+	 */
+	public function __call( $method , $arguments ) {
 		$method = static::_mapMethod( $method );
 		if ( $method === false ) {
 			throw new \BadMethodCallException('Method does not exist: ' . $method . '.' );
@@ -248,14 +248,14 @@ class Model
 		return $method->runRequest( $path , $arguments );
 	}
 
-    /**
-     * @internal
-     * @param string $method
-     * @param array $arguments
-     * @return mixed
-     * @throws \BadMethodCallException
-     */
-    public static function __callStatic( $method , $arguments ) {
+	/**
+	 * @internal
+	 * @param string $method
+	 * @param array $arguments
+	 * @return mixed
+	 * @throws \BadMethodCallException
+	 */
+	public static function __callStatic( $method , $arguments ) {
 		$method = static::_mapMethod( $method );
 		if ( $method === false ) {
 			throw new \BadMethodCallException('Method does not exist: ' . $method . '.' );
@@ -267,12 +267,12 @@ class Model
 		return $method->runRequest( static::getRelativeApiPath() , $arguments );
 	}
 
-    /**
-     * @internal
-     * @param string $name
-     * @return mixed|null
-     */
-    public function __get( $name ) {
+	/**
+	 * @internal
+	 * @param string $name
+	 * @return mixed|null
+	 */
+	public function __get( $name ) {
 		// check references
 		if ( isset( $this->_reference_definitions[ $name ] ) ) {
 			// initiate blank
@@ -296,12 +296,12 @@ class Model
 		return null;
 	}
 
-    /**
-     * @internal
-     * @param string $name
-     * @param mixed $value
-     */
-    public function __set( $name , $value ) {
+	/**
+	 * @internal
+	 * @param string $name
+	 * @param mixed $value
+	 */
+	public function __set( $name , $value ) {
 		// no change required?
 		if ( isset( $this->_data[ $name ] ) && $this->_data[ $name ] == $value ) {
 			unset( $this->_new_data[ $name ] );
@@ -316,12 +316,12 @@ class Model
 		$this->_new_data[ $name ] = $value;
 	}
 
-    /**
-     * @internal
-     * @param string $name
-     * @return bool
-     */
-    public function __isset( $name ) {
+	/**
+	 * @internal
+	 * @param string $name
+	 * @return bool
+	 */
+	public function __isset( $name ) {
 		// is reference set
 		if ( isset( $this->_reference_definitions[ $name ] ) ) {
 			return $this->_reference_definitions[ $name ]->isReferenceSet( $this->_references[ $name ] );
@@ -340,11 +340,11 @@ class Model
 		return false;
 	}
 
-    /**
-     * @internal
-     * @param string $name
-     */
-    public function __unset( $name ) {
+	/**
+	 * @internal
+	 * @param string $name
+	 */
+	public function __unset( $name ) {
 		// clear if exists in _data
 		if ( array_key_exists( $name , $this->_data ) ) {
 			if ( $this->_data[ $name ] !== null ) {
@@ -359,7 +359,7 @@ class Model
 	}
 
 	/**
-     * @internal
+	 * @internal
 	 * @param mixed $id
 	 * @param array $data
 	 */

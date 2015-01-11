@@ -2,6 +2,8 @@
 
 namespace Arctic\Model\Person;
 
+use Arctic\Api;
+use Arctic\Method\Method;
 use Arctic\Model;
 
 /**
@@ -25,6 +27,8 @@ use Arctic\Model;
  * @property Address[] $addresses
  * @property PhoneNumber[] $phonenumbers
  * @property Note[] $notes
+ * @method email(int $templateid=null,bool $outbox=false)
+ * @method link(int $siteid=null)
  */
 class Person extends Model
 {
@@ -40,4 +44,18 @@ class Person extends Model
 		$this->_addMultipleReference('phonenumbers', __NAMESPACE__ . '\PhoneNumber', 'phonenumber' , array( 'id' => 'personid' ) );
 		$this->_addMultipleReference('notes', __NAMESPACE__ . '\Note', 'note', array( 'id' => 'personid' ) );
 	}
+
+    protected static function _mapMethod( $method ) {
+        // person specific method: email($templateid=null, $outbox=false)
+        if ( $method === 'email' ) {
+            return new Method(Method::TYPE_EXISTING_MODEL, Api::METHOD_POST, 'email', array('templateid' , 'outbox'));
+        }
+
+        // person specific method: link($siteid=null)
+        if ( $method === 'link' ) {
+            return new Method(Method::TYPE_EXISTING_MODEL, Api::METHOD_GET, 'link', array('siteid'));
+        }
+
+        return parent::_mapMethod($method);
+    }
 }

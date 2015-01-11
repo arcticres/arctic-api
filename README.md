@@ -1,7 +1,10 @@
-arctic-php-api
-==============
+arctic-api
+==========
 
-A PHP based interface to the Arctic Reservations v2 API.
+PHP and JavaScript based interfaces to the Arctic Reservations v2 API.
+
+PHP
+---
 
 These classes make it easy to access data from Arctic Reservations and make changes, all via a
 PHP object oriented interface. The files include support for OAuth 2.0 authentication, as well
@@ -28,15 +31,24 @@ Support for:
 * Rental item pricing levels
 * Business groups
 
-## Version
+JavaScript
+----------
 
-Version v0.5 (beta)
+The JavaScript reservation widget makes it easy to build custom replacements to the first step
+of the online booking process, including the ability to search and filter trips, as well as to
+display the initial booking form to get guest and add-on information. The JavaScript
+functionality relies on an open (unauthenticated) API for online reservations.
 
-The API is approaching a version 1 release. The latest version introduces substantial changes
-in directory and naming structure to enable PSR-4 and Composer support.
+### Version
 
+Version v0.6 (beta)
 
-## Authors
+The API is approaching a version 1 release. Version 0.6 introduces the JavaScript reservation
+widget, as well as a few example implementations.
+
+The repository has also been renamed to remove PHP from the name.
+
+### Authors
 
 **L. Nathan Perkins**
 
