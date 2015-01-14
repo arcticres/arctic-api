@@ -34,6 +34,18 @@ class Api
 	private $_token;
 
 	/**
+	 * Is current token from the cache manager? Tracked to allow automatically rerun queries in case token has expired.
+	 * @var bool
+	 */
+	private $_cached_token = false;
+
+	/**
+	 * Used to track conditions where authenticated request should be reattempt (primarily in case token has expired).
+	 * @var bool
+	 */
+	private $_should_retry;
+
+	/**
 	 * @var Cache\Manager
 	 */
 	private $_cache_manager;
@@ -296,6 +308,12 @@ class Api
 		if (200 > $status || 300 <= $status) {
 			// special status codes
 			if (403 === $status) {
+				// flag for retry if the token is from the cache
+				if ($this->_cached_token) {
+					$this->_should_retry = true;
+				}
+
+				// clear token
 				$this->_clearToken();
 			}
 
@@ -319,6 +337,7 @@ class Api
 	private function _clearToken() {
 		// clear internal token
 		$this->_token = null;
+		$this->_cached_token = false;
 
 		// get cache key
 		$cache = 'token::' . $this->_getConfig('username');
@@ -333,12 +352,14 @@ class Api
 
 		// allow hard coded tokens
 		if ($token = $this->_getConfig('token')) {
+			$this->_cached_token = false;
 			return $this->_token = $token;
 		}
 
 		// use cache
 		$cache = 'token::' . $this->_getConfig('username');
 		if ($token = $this->getCacheManager()->get($cache)) {
+			$this->_cached_token = true;
 			return $this->_token = $token;
 		}
 
@@ -362,6 +383,7 @@ class Api
 
 		// success!
 		if (is_array($response) && isset($response[ 'access_token'])) {
+			$this->_cached_token = false;
 			$this->_token = $response['access_token' ];
 
 			// cache token
@@ -399,6 +421,15 @@ class Api
 			'Authorization'    =>  'Bearer ' . $token
 		));
 
-		return $this->_sendRequest($url, $method, $body, $headers);
+		// response
+		$this->_should_retry = false;
+		$response = $this->_sendRequest($url, $method, $body, $headers);
+
+		// allow retry once
+		if ($this->_should_retry) {
+			$response = $this->_sendRequest($url, $method, $body, $headers);
+		}
+
+		return $response;
 	}
 }

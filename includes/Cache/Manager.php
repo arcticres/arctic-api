@@ -48,7 +48,10 @@ class Manager
     public function __construct($cache_type=null, array $cache_config=null) {
         // allow condensed format [type => "", ...]
         if ( $cache_config === null && is_array( $cache_type ) ) {
-            if (!isset($cache_config['type'])) throw new Exception('If a combined cache configuration is used, then it must have the key "type".');
+            $cache_config = $cache_type;
+            if (!isset($cache_config['type'])) {
+                throw new Exception('If a combined cache configuration is used, then it must have the key "type".');
+            }
             $cache_type = $cache_config['type'];
         }
 
@@ -105,6 +108,10 @@ class Manager
 
     public function forceNoCacheForNext() {
         $this->_next_force = false;
+    }
+
+    public function forceProfileForNext($cache_profile) {
+        $this->_next_force = $cache_profile;
     }
 
     public function setCacheProfile($cache_profile) {
@@ -180,16 +187,19 @@ class Manager
         // next
         if (isset($this->_next_force)) {
             // force next value?
-            $force = $this->_next_force;
+            $profile = $this->_next_force;
             $this->_next_force = null;
-
-            if ( !$force ) return null;
         }
         else {
             // get profile
             $profile = $this->_getCacheProfile($key, $class);
-            if ( $profile === false ) return null;
+
+            // use default cache profile
+            if (null === $profile) $profile = ($default_profile ? $default_profile : self::DEFAULT_CACHE);
         }
+
+        // boolean false means no caching
+        if (false === $profile) return null;
 
         // run cache
         if ($class) $key = sprintf('%s::%s', $class, $key);
@@ -208,12 +218,22 @@ class Manager
             return;
         }
 
-        // get profile
-        $profile = $this->_getCacheProfile($key, $class);
-        if ( $profile === false ) return;
+        // next
+        if (isset($this->_next_force)) {
+            // force next value?
+            $profile = $this->_next_force;
+            $this->_next_force = null;
+        }
+        else {
+            // get profile
+            $profile = $this->_getCacheProfile($key, $class);
 
-        // use default cache profile
-        if ( $profile === null ) $profile = ($default_profile ? $default_profile : self::DEFAULT_CACHE);
+            // use default cache profile
+            if (null === $profile) $profile = ($default_profile ? $default_profile : self::DEFAULT_CACHE);
+        }
+
+        // boolean false means no caching
+        if (false === $profile) return;
 
         // run cache
         if ($class) $key = sprintf('%s::%s', $class, $key);
