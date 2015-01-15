@@ -176,7 +176,7 @@
 			// cancel existing request
 			if (!opts.multi) {
 				if (req) {
-					req.cancel();
+					req.abort();
 					req = null;
 				}
 			}
