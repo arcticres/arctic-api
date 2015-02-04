@@ -116,7 +116,7 @@
 
 		// allows use of the reserve widget on the guest-facing site without resorting to JSONP
 		function _useJsonp() {
-			return (location.host !== options.gfsDomain);
+			return (options.gfsDomain && location.host !== options.gfsDomain);
 		}
 
 		this.fetchLandingPage = function (web_name, callback) {
@@ -149,7 +149,8 @@
 			// opts: start (default: empty), end (default: empty), query (default: empty),
 			//       from (default: 0), limit (default: 100), web_name (default: empty),
 			//       group (default: true), guests (default: empty), multi (default: false),
-			//       success (instead of callback), error (instead of err_callback)
+			//       filters (default: empty), success (instead of callback),
+			//       error (instead of err_callback)
 
 			var url = _getBaseUrl() + "/reserve/api", get_params = {}, cur_req;
 
@@ -164,6 +165,15 @@
 					get_params[v] = opts[v];
 				}
 			});
+
+			// support additional filters
+			if (opts.filters) {
+				$.each(["group", "date", "lp", "guests", "time", "type"], function(k, v) {
+					if (v in opts.filters) {
+						get_params[v] = opts.filters[v];
+					}
+				});
+			}
 
 			// callback via options
 			if (opts.success) {
@@ -189,7 +199,7 @@
 				data: get_params
 			}).done(function (data) {
 				if (data.success) {
-					callback(data.results);
+					callback(data.results, data.filters);
 				}
 				else if (data.error) {
 					err_callback(data.details);
