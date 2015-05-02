@@ -294,12 +294,14 @@ class Api
 
 		// get status
 		$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 
 		// close
 		curl_close($ch);
 
 		// explode
-		list($raw_headers, $raw_response) = explode("\r\n\r\n", $data, 2);
+		$raw_headers = substr($data, 0, $header_size);
+		$raw_response = substr($data, $header_size);
 
 		// log it
 		$this->_log($method . ' ' . $url, $body, $raw_headers . "\n\n" . $raw_response);
