@@ -334,7 +334,7 @@ class Api
 		// parse it
 		$parsed = @json_decode($raw_response,true);
 		if (null === $parsed) {
-			$this->raiseError('Unable to Parse Response', json_last_error());
+			$this->raiseError('Unable to Parse Response', sprintf("JSON: %d\n%s", json_last_error(), $raw_response));
 			return false;
 		}
 
