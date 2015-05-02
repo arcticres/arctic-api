@@ -1,4 +1,4 @@
-$(function() {
+jQuery(function($) {
 	"use strict";
 
 	// UTILITIES
@@ -21,7 +21,7 @@ $(function() {
 	}
 
 	function _scrollToElement(el) {
-		$("body").animate({scrollTop: $(el).offset().top - 20});
+		$("html, body").animate({scrollTop: $(el).offset().top - 20});
 	}
 
 	function _getBrightness(color) {

@@ -1,15 +1,14 @@
-// create widget
-var w = new ArcticReserveWidget({
-	gfsDomain: "reservations.theraftingcompany.com"
-});
+jQuery(function($) {
+	// create widget
+	var w = new ArcticReserveWidget({
+		gfsDomain: "reservations.theraftingcompany.com"
+	});
 
-// fetch all upcoming trips
-var _resultLookup = {};
-w.fetch({
-
-}, function(data) {
+	// fetch all upcoming trips
+	var _resultLookup = {};
+	w.fetch({}, function (data) {
 		// construct trip tables
-		$.each(data, function(i, group) {
+		$.each(data, function (i, group) {
 			var container = $('<div></div>'), html = '<table border="1"><tr> <th>Name</th> <th>Start</th> <th>End</th> <th>Action</th> </tr>';
 
 			// make header
@@ -19,7 +18,7 @@ w.fetch({
 			$('<p></p>').text(group.description).appendTo(container);
 
 			// add trips
-			$.each(group.results, function(j, result) {
+			$.each(group.results, function (j, result) {
 				var button = '';
 
 				// store in result lookup
@@ -50,7 +49,7 @@ w.fetch({
 		});
 
 		// make reserve buttons clickable
-		$("#results").on("click", ".reserve", function(ev) {
+		$("#results").on("click", ".reserve", function (ev) {
 			var id = $(this).data("resultid");
 			if (_resultLookup[id]) {
 				// prevent default
@@ -65,62 +64,64 @@ w.fetch({
 				scrollToElement("#book");
 			}
 		});
-	}, function(err) {
+	}, function (err) {
 		// show error message
 		$('<div class="error"><p><strong>Error.</strong> Unable to fetch trip dates.</p></div>').appendTo("#results");
 	});
 
 
-// UTILITIES
+	// UTILITIES
 
-var _escapeMap = {
-	'&': '&amp;',
-	'<': '&lt;',
-	'>': '&gt;'
-};
+	var _escapeMap = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;'
+	};
 
-function _escapeReplace(tag) {
-	return _escapeMap[tag] || tag;
-}
-
-function escape(str) {
-	return str.replace(/[&<>]/g, _escapeReplace);
-}
-
-function scrollToElement(el) {
-	$("body").animate({scrollTop: $(el).offset().top - 20});
-}
-
-// this is a very simple function for parsing and formatting dates
-// using a more robust library, like moment is strongly recommended
-var _reDateTime = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
-function formatDateTime(str) {
-	var match = _reDateTime.exec(str);
-
-	if (!match)
-		return '';
-
-	var dt = parseInt(match[2], 10) + "/" + parseInt(match[3], 10) + "/" + parseInt(match[1], 10),
-		hr = parseInt(match[4], 10), apm = "AM", tm;
-
-	// just date
-	if (0 === hr && "00" === match[5]) {
-		return dt;
+	function _escapeReplace(tag) {
+		return _escapeMap[tag] || tag;
 	}
 
-	// format time
-	if (12 < hr) {
-		apm = "PM";
-		hr = hr - 12;
-	}
-	else if (12 === hr) {
-		apm = "PM";
-	}
-	else if (0 === hr) {
-		hr = 12;
+	function escape(str) {
+		return str.replace(/[&<>]/g, _escapeReplace);
 	}
 
-	tm = hr + ":" + match[5] + " " + apm;
+	function scrollToElement(el) {
+		$("html, body").animate({scrollTop: $(el).offset().top - 20});
+	}
 
-	return dt + " " + tm;
-}
+	// this is a very simple function for parsing and formatting dates
+	// using a more robust library, like moment is strongly recommended
+	var _reDateTime = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+
+	function formatDateTime(str) {
+		var match = _reDateTime.exec(str);
+
+		if (!match)
+			return '';
+
+		var dt = parseInt(match[2], 10) + "/" + parseInt(match[3], 10) + "/" + parseInt(match[1], 10),
+			hr = parseInt(match[4], 10), apm = "AM", tm;
+
+		// just date
+		if (0 === hr && "00" === match[5]) {
+			return dt;
+		}
+
+		// format time
+		if (12 < hr) {
+			apm = "PM";
+			hr = hr - 12;
+		}
+		else if (12 === hr) {
+			apm = "PM";
+		}
+		else if (0 === hr) {
+			hr = 12;
+		}
+
+		tm = hr + ":" + match[5] + " " + apm;
+
+		return dt + " " + tm;
+	}
+});

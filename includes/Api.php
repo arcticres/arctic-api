@@ -310,7 +310,14 @@ class Api
 			if (403 === $status) {
 				// flag for retry if the token is from the cache
 				if ($this->_cached_token) {
+					// clear cached token
+					$this->_clearToken();
+
+					// flag should retry
 					$this->_should_retry = true;
+
+					// could keep running, but just cut to the chase....
+					return false;
 				}
 
 				// clear token
@@ -327,7 +334,7 @@ class Api
 		// parse it
 		$parsed = @json_decode($raw_response,true);
 		if (null === $parsed) {
-			$this->raiseError('Unable to Parse Response', json_last_error());
+			$this->raiseError('Unable to Parse Response', sprintf("JSON: %d\n%s", json_last_error(), $raw_response));
 			return false;
 		}
 
@@ -427,6 +434,14 @@ class Api
 
 		// allow retry once
 		if ($this->_should_retry) {
+			// get token again, just in case
+			$token = $this->_getToken();
+			if (false === $token) return false;
+
+			// updated headers, just in case
+			$headers['Authorization'] = 'Bearer ' . $token;
+
+			// run response again
 			$response = $this->_sendRequest($url, $method, $body, $headers);
 		}
 
