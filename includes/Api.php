@@ -221,7 +221,7 @@ class Api
 
 	private function _sendRequest( $url , $method=self::METHOD_GET , $body=null , array $headers=null ) {
 		$default_headers = array(
-			'Accepts'       =>  'application/json'
+			'Accept' => 'application/json'
 		);
 
 		// figure out protocol
@@ -448,5 +448,72 @@ class Api
 		}
 
 		return $response;
+	}
+
+	public function authenticateFromAuthorizationCode($code, $redirect_uri=null, $cache=true) {
+		// parameters for request
+		$params = array(
+			'grant_type' => 'authorization_code',
+			'code' => $code,
+			'client_id' => $this->_getConfig('client_id'),
+			'client_secret' => $this->_getConfig('client_secret')
+		);
+
+		// add redirect uri
+		if ($redirect_uri) {
+			$params['redirect_uri'] = $redirect_uri;
+		}
+
+		// run request
+		$response = $this->sendRequest('oauth/user/token?' . http_build_query($params));
+
+		if (is_array($response)) {
+			// has access token?
+			if (isset($response['access_token'])) {
+				// store token
+				$this->_cached_token = false;
+				$this->_token = $response['access_token'];
+
+				// cache token
+				if ($cache) {
+					$this->getCacheManager()->set($cache, $this->_token, null, isset($response['expires_in']) ? (int)$response['expires_in'] : null);
+				}
+
+				return true;
+			}
+
+			// authentication failure
+			if (isset($response['error'])) {
+				$this->raiseError('Authentication Failed', 'Response: ' . $response['error']);
+				return false;
+			}
+		}
+
+		// unknown
+		$this->raiseError('Unknown Authentication Response', 'Response type: ' . gettype($response));
+		return false;
+	}
+
+	public function buildAuthenticationLink($redirect_uri=null, $scope=null, $state=null) {
+		// build url
+		$url = $this->_getConfig('host') . $this->_getConfig('oauth_link', '/auth/login/oauth');
+
+		// build params
+		$params = array(
+			'client_id' => $this->_getConfig('client_id'),
+			'response_type' => 'code',
+			'redirect_uri' => $redirect_uri
+		);
+
+		// add optional parameters
+		if ($scope) {
+			$params['scope'] = $scope;
+		}
+
+		if ($state) {
+			$params['state'] = $state;
+		}
+
+		return $url . '?' . http_build_query($params);
 	}
 }
