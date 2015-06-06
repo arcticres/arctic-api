@@ -465,7 +465,7 @@ class Api
 		}
 
 		// run request
-		$response = $this->sendRequest('oauth/user/token?' . http_build_query($params));
+		$response = $this->sendRequest('oauth/user/token', self::METHOD_POST, http_build_query($params));
 
 		if (is_array($response)) {
 			// has access token?
@@ -479,7 +479,7 @@ class Api
 					$this->getCacheManager()->set($cache, $this->_token, null, isset($response['expires_in']) ? (int)$response['expires_in'] : null);
 				}
 
-				return true;
+				return $response;
 			}
 
 			// authentication failure
