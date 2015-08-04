@@ -38,6 +38,9 @@ use Arctic\Model;
  * @property string $createdon
  * @property string $modifiedon
  * @property bool $deleted
+ * @property string $onlinebookingurl Link to book online (if enabled and available).
+ * @property int $guests Number of guests.
+ * @property int $remainingopenings Remaining openings available to book.
  * @property \Arctic\Model\BusinessGroup $businessgroup
  * @property PricingLevel[] $pricinglevels
  * @property Component[] $components
