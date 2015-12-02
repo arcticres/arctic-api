@@ -71,8 +71,8 @@ class Api
 		$class = ltrim($class, '\\');
 
 		// only process "Arctic\" vendor code
-		if ( substr( $class , 0 , 7 ) !== 'Arctic\\' ) return;
-		$class = substr( $class , 7 );
+		if (0 !== substr_compare($class, 'Arctic\\', 0, 7)) return;
+		$class = substr($class, 7);
 
 		// convert to file name
 		$file_name  = '';

@@ -18,7 +18,7 @@ use Arctic\Model;
  * @property bool $canceled
  * @property string $color
  * @property int $openings
- * @property int $remainingopenings
+ * @property int $remainingopenings Remaining openings available to book.
  * @property int $inventoryitemid
  * @property string $duration
  * @property int $registrationformid
@@ -40,7 +40,6 @@ use Arctic\Model;
  * @property bool $deleted
  * @property string $onlinebookingurl Link to book online (if enabled and available).
  * @property int $guests Number of guests.
- * @property int $remainingopenings Remaining openings available to book.
  * @property \Arctic\Model\BusinessGroup $businessgroup
  * @property PricingLevel[] $pricinglevels
  * @property Component[] $components

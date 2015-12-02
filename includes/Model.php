@@ -345,16 +345,16 @@ class Model
 	 * @param string $name
 	 */
 	public function __unset( $name ) {
+		if ( isset( $this->_reference_definitions[ $name ] ) ) {
+			Api::getInstance()->raiseError('Unable to Unset Reference','Reference can not be unset. Delete the reference object, or edit the reference id column.');
+		}
+
 		// clear if exists in _data
 		if ( array_key_exists( $name , $this->_data ) ) {
 			if ( $this->_data[ $name ] !== null ) {
 				$this->_new_data[ $name ] = null;
 			}
 			return;
-		}
-
-		if ( isset( $this->_reference_definitions[ $name ] ) ) {
-			Api::getInstance()->raiseError('Unable to Unset Reference','Reference can not be unset. Delete the reference object, or edit the reference id column.');
 		}
 	}
 
