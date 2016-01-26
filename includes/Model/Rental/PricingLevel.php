@@ -1,6 +1,6 @@
 <?php
 
-namespace Arctic\Rental;
+namespace Arctic\Model\Rental;
 
 use Arctic\Model;
 
