@@ -14,7 +14,6 @@ namespace Arctic;
 class Model
 {
 	protected $_id;
-	protected $_explicit;
 	protected $_exists = false;
 	protected $_data = array();
 	protected $_new_data = array();
