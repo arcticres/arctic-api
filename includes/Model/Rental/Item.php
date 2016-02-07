@@ -8,22 +8,62 @@ use Arctic\Model;
 
 class _MethodPrice extends Method
 {
+	protected $_cache_key;
+
 	public function __construct() {
 		parent::__construct(self::TYPE_EXISTING_MODEL, Api::METHOD_GET, 'price', array('start', 'end'));
 	}
 
+	protected function _prepareRequest( $api_path , $arguments ) {
+		if (empty($arguments[0]) || empty($arguments[1])) {
+			Api::getInstance()->raiseError('No Start or End Specified','A start and end date or date time must be provided to calculate a price.');
+		}
+
+		$this->_cache_key = sprintf('%s::%s::%s', $api_path, $arguments[0], $arguments[1]);
+
+		// check cache
+		if ($cached_response = Api::getInstance()->getCacheManager()->get($this->_cache_key, $this->_model_class)) {
+			return $cached_response;
+		}
+
+		return parent::_prepareRequest($api_path, $arguments);
+	}
+
 	protected function _parseResponse($response) {
+		// cache response
+		if ($this->_cache_key) {
+			Api::getInstance()->getCacheManager()->set($this->_cache_key, $response, $this->_model_class);
+		}
+
 		return $response;
 	}
 }
 
 class _MethodAvailability extends Method
 {
+	protected $_cache_key;
+
 	public function __construct() {
 		parent::__construct(self::TYPE_EXISTING_MODEL, Api::METHOD_GET, 'availability', array('start', 'end'));
 	}
 
+	protected function _prepareRequest( $api_path , $arguments ) {
+		$this->_cache_key = sprintf('%s::%s::%s', $api_path, isset($arguments[0]) ? $arguments[0] : '_', isset($arguments[1]) ? $arguments[1] : '_');
+
+		// check cache
+		if ($cached_response = Api::getInstance()->getCacheManager()->get($this->_cache_key, $this->_model_class)) {
+			return $cached_response;
+		}
+
+		return parent::_prepareRequest($api_path, $arguments);
+	}
+
 	protected function _parseResponse($response) {
+		// cache response
+		if ($this->_cache_key) {
+			Api::getInstance()->getCacheManager()->set($this->_cache_key, $response, $this->_model_class);
+		}
+
 		return $response;
 	}
 }

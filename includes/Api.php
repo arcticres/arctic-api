@@ -46,6 +46,12 @@ class Api
 	private $_should_retry;
 
 	/**
+	 * Tracks the status of the last response, which is used to provide more detailed exception types.
+	 * @var int
+	 */
+	private $_last_status;
+
+	/**
 	 * @var Cache\Manager
 	 */
 	private $_cache_manager;
@@ -166,17 +172,18 @@ class Api
 		return $this->_cache_manager;
 	}
 
-//	private function _signRequest( $url , $method , $body=null ) {
-//		//if ( $body ) return hash_hmac('sha256',$body,)
-//	}
+	public function raiseError($error_name, $error_description, $error_type=null) {
+		// use HTTP status code if one is not specified
+		if (null === $error_type && isset($this->_last_status) && 200 !== $this->_last_status) {
+			$error_type = $this->_last_status;
+		}
 
-	public function raiseError($error_name,$error_description) {
 		// store last error
-		self::$_last_error = sprintf('%s: %s',$error_name,$error_description);
+		self::$_last_error = sprintf('%s: %s (%d)',$error_name, $error_description, $error_type);
 
 		switch ( isset( $this->_config ) && isset( $this->_config[ 'errors' ] ) ? $this->_config[ 'errors' ] : self::ERRORS_EXCEPTION ) {
 			case self::ERRORS_EXCEPTION:
-				throw new Exception(sprintf('%s: %s',$error_name,$error_description));
+				throw Exception::create($error_type, sprintf('%s: %s',$error_name,$error_description));
 			case self::ERRORS_ERROR:
 				trigger_error(sprintf('%s: %s',$error_name,$error_description),E_USER_ERROR);
 				break;
@@ -288,7 +295,7 @@ class Api
 			curl_close($ch);
 
 			// raise error
-			$this->raiseError('Request Failed', 'Unable to connect: ' . $error . '.');
+			$this->raiseError('Request Failed', 'Unable to connect: ' . $error . '.', Exception::TYPE_CONNECTION);
 			return false;
 		}
 
@@ -305,6 +312,9 @@ class Api
 
 		// log it
 		$this->_log($method . ' ' . $url, $body, $raw_headers . "\n\n" . $raw_response);
+
+		// store status
+		$this->_last_status = $status;
 
 		// check status
 		if (200 > $status || 300 <= $status) {
@@ -328,15 +338,15 @@ class Api
 
 			// non  JSON response? just raise the error here
 			if ('{' !== $raw_response[0] && '[' !== $raw_response[0]) {
-				$this->raiseError('Unexpected Response: '.  $status, $raw_response);
+				$this->raiseError('Unexpected Response: '.  $status, $raw_response, Exception::TYPE_PARSE);
 				return false;
 			}
 		}
 
 		// parse it
-		$parsed = @json_decode($raw_response,true);
+		$parsed = @json_decode($raw_response, true);
 		if (null === $parsed) {
-			$this->raiseError('Unable to Parse Response', sprintf("JSON: %d\n%s", json_last_error(), $raw_response));
+			$this->raiseError('Unable to Parse Response', sprintf("JSON: %d\n%s", json_last_error(), $raw_response), Exception::TYPE_PARSE);
 			return false;
 		}
 
@@ -403,12 +413,12 @@ class Api
 
 		// error
 		if ( is_array( $response ) && isset( $response[ 'error' ] ) ) {
-			$this->raiseError('Authentication Failed','Response: ' . $response['error'] );
+			$this->raiseError('Authentication Failed', 'Response: ' . $response['error'], Exception::TYPE_UNAUTHORIZED);
 			return false;
 		}
 
 		// unknown
-		$this->raiseError('Unknown Authentication Response','Response type: ' . gettype($response));
+		$this->raiseError('Unknown Authentication Response', 'Response type: ' . gettype($response), Exception::TYPE_PARSE);
 		return false;
 	}
 

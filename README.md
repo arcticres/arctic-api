@@ -23,13 +23,20 @@ Support for:
 * Inquiries
 * Invoices
 * Invoice data - groups, items, transactions
+* Activities
+* Reservations
+* Reservation members (guests)
 * Trips
 * Trip types
 * Trip pricing levels
 * Trip add-ons
+* Rentals
+* Rental includes
 * Rental items
 * Rental item pricing levels
 * Business groups
+
+Requires PHP 5.3+ (supports PHP 7.0).
 
 JavaScript
 ----------
@@ -41,12 +48,17 @@ functionality relies on an open (unauthenticated) API for online reservations.
 
 ### Version
 
-Version v0.6 (beta)
+Version v0.7 (beta)
 
 The API is approaching a version 1 release. Version 0.6 introduces the JavaScript reservation
 widget, as well as a few example implementations.
 
 The repository has also been renamed to remove PHP from the name.
+
+Version 0.7 has added a few new models (activities, rentals and reservations), added more
+methods to existing models (such as price and availability data for rental items) and
+substantially improved error handling by providing different exception types based on
+the HTTP status code.
 
 ### Authors
 
