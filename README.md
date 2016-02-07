@@ -36,6 +36,8 @@ Support for:
 * Rental item pricing levels
 * Business groups
 
+Requires PHP 5.3+ (supports PHP 7.0).
+
 JavaScript
 ----------
 
