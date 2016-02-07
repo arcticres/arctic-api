@@ -4,7 +4,7 @@ namespace Arctic\Cache;
 
 class Memcache implements Cache
 {
-    const FLAG = 4;
+    const FLAG = 0x10000;
 
     private $_prefix = '';
 
@@ -74,6 +74,7 @@ class Memcache implements Cache
     }
 
     public function get( $key ) {
+        $flags = 0;
         $ret = $this->_mc->get($this->_prefix . $key, $flags);
         if ($flags > 0) return $ret;
         return null;

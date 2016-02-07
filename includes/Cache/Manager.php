@@ -47,11 +47,21 @@ class Manager
 
     public function __construct($cache_type=null, array $cache_config=null) {
         // allow condensed format [type => "", ...]
-        if ( $cache_config === null && is_array( $cache_type ) ) {
-            $cache_config = $cache_type;
+        if (is_array($cache_type)) {
+            // merge condensed format
+            if (null === $cache_config) {
+                $cache_config = $cache_type;
+            }
+            else {
+                $cache_config = array_merge($cache_config, $cache_type);
+            }
+
+            // ensure a type is provided
             if (!isset($cache_config['type'])) {
                 throw new Exception('If a combined cache configuration is used, then it must have the key "type".');
             }
+
+            // extract type
             $cache_type = $cache_config['type'];
         }
 
