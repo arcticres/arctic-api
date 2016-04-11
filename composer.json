@@ -2,13 +2,13 @@
     "name": "arctic/arctic2api",
     "type": "library",
     "description": "API for interacting with Arctic Reservations version 2",
-    "homepage": "https://github.com/nathanntg/arctic-api",
+    "homepage": "https://github.com/arcticres/arctic-api",
     "license": "MIT",
     "authors": [
         {
             "name": "L. Nathan Perkins",
             "email": "nathan@arcticreservations.com",
-            "homepage": "http://www.nathanntg.com/"
+            "homepage": "https://www.nathanntg.com/"
         }
     ],
     "require": {
