@@ -141,6 +141,12 @@ class Api
 		// get instance
 		$instance = self::getInstance();
 
+		// already initialized
+		if ($instance->_config) {
+			$instance->raiseError('Already Configured', 'The Arctic API class has not been initialized. It must be deinitialized first.');
+			return;
+		}
+
 		// store configuration
 		$instance->_setConfiguration($config);
 
@@ -155,6 +161,13 @@ class Api
 		if ( $need_autoload ) {
 			spl_autoload_register(__CLASS__ . '::autoloadClass');
 		}
+	}
+
+	/**
+	 * Deinitialize API. Useful if you connect to multiple installations.
+	 */
+	public static function deinit() {
+		self::$_instance = null;
 	}
 
 	/**
