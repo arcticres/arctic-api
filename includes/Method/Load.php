@@ -8,6 +8,7 @@ use Arctic\Model;
 class Load extends Method
 {
 	protected $_id;
+	protected $_cache_key;
 
 	public function __construct() {
 		parent::__construct( self::TYPE_GENERAL , Api::METHOD_GET );
@@ -23,7 +24,7 @@ class Load extends Method
 
         // update cache?
         if ($update_cache) {
-            Api::getInstance()->getCacheManager()->set($this->_id, $response, $class);
+            Api::getInstance()->getCacheManager()->set($this->_cache_key, $response, $class);
         }
 
 		/** @var Model $me */
@@ -42,8 +43,17 @@ class Load extends Method
             Api::getInstance()->raiseError('No ID Specified','Load expects a valid object ID to fetch.');
         }
 
+		// include special arguments in cache key
+		$last = count($arguments) - 1;
+		if (0 < $last && is_array($arguments[$last])) {
+			$this->_cache_key = $this->_id . '?' . http_build_query($arguments[$last]);
+		}
+		else {
+			$this->_cache_key = $this->_id;
+		}
+
         // check cache
-        if ($cached_response = Api::getInstance()->getCacheManager()->get($this->_id, $this->_model_class)) {
+        if ($cached_response = Api::getInstance()->getCacheManager()->get($this->_cache_key, $this->_model_class)) {
             return $this->_parseResponse($cached_response, false);
         }
 
