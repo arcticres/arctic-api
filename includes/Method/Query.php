@@ -9,6 +9,7 @@ use Arctic\ModelSet;
 class Query extends Method
 {
     private $_cache_key;
+	private $_cache_each; // if special arguments are included, associated item cache with those arguments
 
 	public function __construct() {
 		parent::__construct( self::TYPE_GENERAL , Api::METHOD_GET , null , array(
@@ -26,7 +27,7 @@ class Query extends Method
         foreach ( $response['entries'] as $arr ) {
             if (!isset($arr['id'])) continue;
             $ids[] = $arr['id'];
-            Api::getInstance()->getCacheManager()->set($arr['id'], $arr, $this->_model_class);
+            Api::getInstance()->getCacheManager()->set($arr['id'] . $this->_cache_each, $arr, $this->_model_class);
         }
 
         // cache ids
@@ -51,6 +52,16 @@ class Query extends Method
         // store api path for cache
         $this->_cache_key = $api_path . '::' . $query;
 
+	    // include special arguments in cache key and per item cache (since can affect items)
+	    $last = count($arguments) - 1;
+	    if (0 < $last && is_array($arguments[$last])) {
+	    	$this->_cache_each = '?' . http_build_query($arguments[$last]);
+		    $this->_cache_key .= $this->_cache_each;
+	    }
+	    else {
+	    	$this->_cache_each = '';
+	    }
+
         // run query
         $cache_manager = Api::getInstance()->getCacheManager();
         $cache_browse = $cache_manager->get($this->_cache_key, $this->_model_class);
@@ -59,7 +70,7 @@ class Query extends Method
             foreach ($cache_browse['entries'] as $key => $id) {
                 // load
                 $cache_manager->forceCacheForNext();
-                if ($cache_obj = $cache_manager->get($id, $this->_model_class)) {
+                if ($cache_obj = $cache_manager->get($id . $this->_cache_each, $this->_model_class)) {
                     $cache_browse['entries'][$key] = $cache_obj;
                 }
                 else {
