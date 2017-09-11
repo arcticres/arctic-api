@@ -168,7 +168,7 @@
 
 			// support additional filters
 			if (opts.filters) {
-				$.each(["group", "date", "lp", "guests", "time", "type"], function(k, v) {
+				$.each(["bg", "date", "lp", "guests", "time", "type"], function(k, v) {
 					if (v in opts.filters) {
 						get_params[v] = opts.filters[v];
 					}
