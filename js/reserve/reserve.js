@@ -504,7 +504,10 @@
 
 			// adjust defaults
 			bf.find("input[data-isdefault]").each(function () {
-				var $this = $(this), cur_val = ( parseInt($this.val(), 10) || 0 );
+				var $this = $(this);
+				var cur_mul = (parseInt($this.data("mul"), 10) || 1);
+				var cur_val = (parseInt($this.val(), 10) || 0) * cur_mul;
+				var new_val;
 				var $set = $this.closest(".addons");
 
 				// skip if this is the container used for guest count
@@ -512,7 +515,11 @@
 
 				if (delta > 0) {
 					// adjust default
-					$this.val(cur_val + delta).trigger($.Event("autoadjust", {
+					new_val = cur_val + delta;
+					if (new_val > new_total) {
+						new_val = new_total;
+					}
+					$this.val(Math.ceil(new_val / cur_mul)).trigger($.Event("autoadjust", {
 						old_val: cur_val,
 						new_val: cur_val + delta,
 						delta: delta
@@ -523,7 +530,8 @@
 					if ($set.hasClass("addon-other")) {
 						// adjust downward
 						if (cur_val > new_total) {
-							$this.val(new_total).trigger($.Event("autoadjust", {
+							new_val = new_total;
+							$this.val(Math.ceil(new_val / cur_mul)).trigger($.Event("autoadjust", {
 								old_val: cur_val,
 								new_val: new_total,
 								delta: delta
@@ -531,13 +539,13 @@
 						}
 					}
 					else {
-						var set_total = _totalInputs($set), new_val;
+						var set_total = _totalInputs($set);
 						if (set_total > new_total) {
 							new_val = cur_val - ( set_total - new_total );
 							if (new_val < 0) {
 								new_val = 0;
 							}
-							$this.val(new_val).trigger($.Event("autoadjust", {
+							$this.val(Math.ceil(new_val / cur_mul)).trigger($.Event("autoadjust", {
 								old_val: cur_val,
 								new_val: new_val,
 								delta: delta
