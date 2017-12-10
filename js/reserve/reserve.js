@@ -574,6 +574,9 @@
 				$el.find("form").on("updateavailability", _updateAvailabilityMessage);
 			}
 
+			// cache guest count (in case quantity is changed without focus)
+			_getGuestCount({target: $el});
+
 			return $el;
 		};
 
