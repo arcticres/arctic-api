@@ -48,7 +48,7 @@
 				return '<select name="' + obj.name + '" id="' + obj.id + '"><option value="false"' + (obj.has ? "" : " selected") + '>No</option><option value="true"' + (obj.has ? " selected" : "") + '>Yes (add ' + _formatCurrency(obj.amount) + ')</option></select>';
 			},
 			bookAddOnGuest: function (obj) {
-				return '<input type="number" name="' + obj.name + '" id="' + obj.id + '" size="3" maxlength="3" class="input-small" value="' + _escape(obj.has) + '" min="0" step="' + _escape(obj.step || 1) + '"' + (obj.def ? ' data-isdefault="true"' : '') + '> (' + _formatCurrency(obj.amount) + ' per guest)';
+				return '<input type="number" name="' + obj.name + '" id="' + obj.id + '" size="3" maxlength="3" class="input-small" value="' + _escape(obj.has) + '" min="0" step="' + _escape(obj.step || 1) + '"' + (obj.mul ? ' data-mul="' + obj.mul + '"' : '') + (obj.def ? ' data-isdefault="true"' : '') + '> (' + _formatCurrency(obj.amount) + ' ' + obj.amount_per + ')';
 			},
 			bookAvailabilityMessage: function(obj) {
 				if (false === obj.available) {
@@ -250,7 +250,7 @@
 			});
 		};
 
-        var _bookFormCount = 0;
+		var _bookFormCount = 0;
 		function _buildBookFields(pricing, guests) {
 			// make sets
 			var sets = {":pl": '<div class="pricing-levels">'}, other = "", prefix = "bf" + ++_bookFormCount + "_";
@@ -263,19 +263,34 @@
 				if (el.per && "res" === el.per) {
 					code = options.templates.bookAddOnReservation({
 						id: prefix + el.id,
-                        name: el.id,
+						name: el.id,
 						has: (el.def ? true : false),
 						amount: el.amnt,
 						def: ':pl' !== el.set && el.def
 					});
 				}
+				else if (el.pi) {
+					// per guest add-on, where quantity is specified per item
+					code = options.templates.bookAddOnGuest({
+						id: prefix + el.id,
+						name: el.id + '_ic',
+						has: (el.def && guests ? Math.ceil(guests / el.div) : 0),
+						step: 1,
+						amount: el.amnt * el.div,
+						amount_per: el.qw || "per item",
+						mul: el.div,
+						def: ':pl' !== el.set && el.def
+					});
+				}
 				else {
 					code = options.templates.bookAddOnGuest({
-                        id: prefix + el.id,
-                        name: el.id,
+						id: prefix + el.id,
+						name: el.id,
 						has: (el.def && guests ? guests : 0),
 						step: (el.div || 1),
 						amount: el.amnt,
+						amount_per: el.qw || "per guest",
+						mul: null,
 						def: ':pl' !== el.set && el.def
 					});
 				}
@@ -285,8 +300,8 @@
 					label: el.nm,
 					id: prefix + el.id,
 					help: (el.set && el.desc ? el.desc : null),
-                    image: el.img,
-                    image_url: el.img ? t.getImageUrl(el.img) : "",
+					image: el.img,
+					image_url: el.img ? t.getImageUrl(el.img) : "",
 					controls: code
 				});
 
@@ -338,28 +353,47 @@
 			});
 		};
 
-        this.getImageUrl = function(image_id, width, height) {
-            var sz;
+		this.getImageUrl = function(image_id, width, height) {
+			var sz;
 
-            // default size
-            if (!width)
-                width = 400;
+			// default size
+			if (!width)
+				width = 400;
 
-            if (!height || height === width) {
-                sz = width; // square
-            }
-            else {
-                sz = width + "x" + height;
-            }
-            // build URL
-            return _getBaseUrl() + "/image/" + image_id + "/" + sz;
-        };
+			if (!height || height === width) {
+				sz = width; // square
+			}
+			else {
+				sz = width + "x" + height;
+			}
+			// build URL
+			return _getBaseUrl() + "/image/" + image_id + "/" + sz;
+		};
+
+		function _getGuestCountContainer(el) {
+			var $el = $(el);
+
+			// use pricing level container, if not empty
+			var pl = $el.find(".pricing-levels");
+			if (pl.find("input").length) {
+				return pl;
+			}
+
+			// use add-on set
+			var ao = $el.find(".addon-set");
+			if (ao.length) {
+				return ao.first();
+			}
+
+			return pl; // fallback to pricing level
+		}
 
 		var _total_guest_count;
 
 		// get guest count
 		function _getGuestCount(ev) {
-			_total_guest_count = _totalInputs($(ev.target).closest(".pricing-levels"));
+			var $cont = _getGuestCountContainer($(ev.target).closest("form"));
+			_total_guest_count = _totalInputs($cont);
 		}
 
 		// update availability message
@@ -374,7 +408,7 @@
 					return;
 
 				// show availability message
-				$form.data("amsg", $(new_html).insertAfter($form.find(".pricing-levels")).hide().show("fast"));
+				$form.data("amsg", $(new_html).insertAfter(_getGuestCountContainer($form)).hide().show("fast"));
 			}
 			else {
 				// nothing to show
@@ -406,7 +440,7 @@
 			var $form = $(form), cur_count = ++_checkCount;
 
 			if (!total_guests) {
-				total_guests = _totalInputs($form.find(".pricing-levels"));
+				total_guests = _totalInputs(_getGuestCountContainer($form));
 			}
 
 			// run check availability
@@ -452,8 +486,10 @@
 		}, 200);
 
 		function _adjustGuestCount(result, ev) {
+			var $cont = _getGuestCountContainer($(ev.target).closest("form"));
+
 			// get delta
-			var new_total = _totalInputs($(ev.target).closest(".pricing-levels")), delta = (new_total - _total_guest_count);
+			var new_total = _totalInputs($cont), delta = (new_total - _total_guest_count);
 
 			// look for defaults
 			var bf = $(ev.target).closest("form");
@@ -468,11 +504,22 @@
 
 			// adjust defaults
 			bf.find("input[data-isdefault]").each(function () {
-				var $this = $(this), cur_val = ( parseInt($this.val(), 10) || 0 );
+				var $this = $(this);
+				var cur_mul = (parseInt($this.data("mul"), 10) || 1);
+				var cur_val = (parseInt($this.val(), 10) || 0) * cur_mul;
+				var new_val;
+				var $set = $this.closest(".addons");
+
+				// skip if this is the container used for guest count
+				if ($set[0] === $cont[0]) { return; }
 
 				if (delta > 0) {
 					// adjust default
-					$this.val(cur_val + delta).trigger($.Event("autoadjust", {
+					new_val = cur_val + delta;
+					if (new_val > new_total) {
+						new_val = new_total;
+					}
+					$this.val(Math.ceil(new_val / cur_mul)).trigger($.Event("autoadjust", {
 						old_val: cur_val,
 						new_val: cur_val + delta,
 						delta: delta
@@ -480,12 +527,11 @@
 				}
 				else if (delta < 0) {
 					// adjust downward, if there are more than the total
-					var $set = $this.closest(".addons");
-					console.log(cur_val, new_total, this);
 					if ($set.hasClass("addon-other")) {
 						// adjust downward
 						if (cur_val > new_total) {
-							$this.val(new_total).trigger($.Event("autoadjust", {
+							new_val = new_total;
+							$this.val(Math.ceil(new_val / cur_mul)).trigger($.Event("autoadjust", {
 								old_val: cur_val,
 								new_val: new_total,
 								delta: delta
@@ -493,13 +539,13 @@
 						}
 					}
 					else {
-						var set_total = _totalInputs($set), new_val;
+						var set_total = _totalInputs($set);
 						if (set_total > new_total) {
 							new_val = cur_val - ( set_total - new_total );
 							if (new_val < 0) {
 								new_val = 0;
 							}
-							$this.val(new_val).trigger($.Event("autoadjust", {
+							$this.val(Math.ceil(new_val / cur_mul)).trigger($.Event("autoadjust", {
 								old_val: cur_val,
 								new_val: new_val,
 								delta: delta
@@ -519,7 +565,7 @@
 			$el = $(html);
 
 			// add events
-			$el.find(".pricing-levels input").on("focus", _getGuestCount).on("blur", function(ev) {
+			_getGuestCountContainer($el).find("input").on("focus", _getGuestCount).on("change", function(ev) {
 				_adjustGuestCount(result, ev);
 			});
 
@@ -528,20 +574,24 @@
 				$el.find("form").on("updateavailability", _updateAvailabilityMessage);
 			}
 
+			// cache guest count (in case quantity is changed without focus)
+			_getGuestCount({target: $el});
+
 			return $el;
 		};
 
 		// utility
 		function _totalInputs(el) {
-			var $this = $(el), cnt = 0;
-			$this.find("input[type=number]").each(function () {
-				cnt = cnt + ( parseInt($(this).val(), 10) || 0 );
+			var $el = $(el), cnt = 0;
+			$el.find("input[type=number]").each(function () {
+				var $this = $(this);
+				cnt = cnt + (parseInt($this.val(), 10) || 0) * (parseInt($this.data("mul"), 10) || 1);
 			});
 			return cnt;
 		}
 
 		this.getTotalGuests = function (el) {
-			return _totalInputs($(el).find(".pricing-levels"));
+			return _totalInputs(_getGuestCountContainer(el));
 		};
 	}
 
