@@ -68,8 +68,28 @@ class SetWrapper extends ModelSet
 		}
 	}
 
+	/**
+	 * Gets the data without loading. Used by some methods to access references for uninserted objects.
+	 * @internal
+	 * @return Model[]
+	 */
+	public function getRawData() {
+		if (isset($this->_data)) {
+			return $this->_data;
+		}
+		return array();
+	}
+
 	protected function _load() {
 		if ( $sub_api_path = $this->_definition->getSubApiPath() ) {
+			// does not exist?
+			if (!$this->_parent->doesExist()) {
+				// do not actually flag as loaded, but return true and initialize
+				// important for new references
+				if (!isset($this->_data)) $this->_data = array();
+				return true;
+			}
+
 			// prefix path
             Model::forceRelativeApiPath( $this->_parent->getMyRelativeApiPath() . '/' . $sub_api_path );
 
