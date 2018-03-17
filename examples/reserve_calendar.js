@@ -86,18 +86,25 @@ jQuery(function($) {
 					};
 
 					// change the color
-					if (2 !== result.action) {
+					if (2 === result.action) {
+						event.color = group_color;
+						event.textColor = group_text;
+						event.className = 'trip-reserve';
+						event.url = result.reserve_url;
+					}
+					else if (result.inquiryonly) {
+						// color it like normal, but give inquire URL
+						event.color = group_color;
+						event.textColor = group_text;
+						event.className = 'trip-reserve';
+						event.url = result.inquire_url;
+					}
+					else {
 						event.borderColor = group_color;
 						event.textColor = '#999999';
 						event.backgroundColor = '#ffffff';
 						event.className = 'trip-inquire';
 						event.url = result.inquire_url;
-					}
-					else {
-						event.color = group_color;
-						event.textColor = group_text;
-						event.className = 'trip-reserve';
-						event.url = result.reserve_url;
 					}
 
 					events.push(event);

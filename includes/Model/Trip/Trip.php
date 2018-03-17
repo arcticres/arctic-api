@@ -43,6 +43,7 @@ use Arctic\Model;
  * @property \Arctic\Model\BusinessGroup $businessgroup
  * @property PricingLevel[] $pricinglevels
  * @property Component[] $components
+ * @property \Arctic\Model\Guide\GuideSchedule[] $guides
  */
 class Trip extends Model
 {
@@ -56,5 +57,6 @@ class Trip extends Model
         $this->_addSingleReference( 'businessgroup' , 'Arctic\Model\BusinessGroup' , array( 'businessgroupid' => 'id' ) );
         $this->_addMultipleReference('pricinglevels', __NAMESPACE__ . '\PricingLevel' , 'pricinglevel' );
         $this->_addMultipleReference('components', __NAMESPACE__ . '\Component' , 'component' );
+        $this->_addMultipleReference('guides', 'Arctic\Model\Guide\GuideSchedule', 'guide');
 	}
 }

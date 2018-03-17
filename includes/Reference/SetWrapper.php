@@ -25,7 +25,7 @@ class SetWrapper extends ModelSet
 	 */
 	protected $_definition;
 
-	public function __construct( $parent , $class_or_array , Definition $definition ) {
+	public function __construct($parent, Definition $definition, array $data=null) {
 		parent::__construct( $definition->getModelClass() , array( 'entries' => array() ) );
 
 		// potential memory leak issue
@@ -33,16 +33,12 @@ class SetWrapper extends ModelSet
 
 		// use sub api path
 		$this->_definition = $definition;
+		$this->_model_class = $this->_definition->getModelClass();
 
 		// set object
-		if ( is_array( $class_or_array ) ) {
-			$this->_model_class = $this->_definition->getModelClass();
-			$this->_setLoadedData( $class_or_array );
+		if ($data) {
+			$this->_setLoadedData($data);
 		}
-		else {
-			$this->_model_class = $class_or_array;
-		}
-
 	}
 
 	/**
@@ -68,8 +64,28 @@ class SetWrapper extends ModelSet
 		}
 	}
 
+	/**
+	 * Gets the data without loading. Used by some methods to access references for uninserted objects.
+	 * @internal
+	 * @return Model[]
+	 */
+	public function getRawData() {
+		if (isset($this->_data)) {
+			return $this->_data;
+		}
+		return array();
+	}
+
 	protected function _load() {
 		if ( $sub_api_path = $this->_definition->getSubApiPath() ) {
+			// does not exist?
+			if (!$this->_parent->doesExist()) {
+				// do not actually flag as loaded, but return true and initialize
+				// important for new references
+				if (!isset($this->_data)) $this->_data = array();
+				return true;
+			}
+
 			// prefix path
             Model::forceRelativeApiPath( $this->_parent->getMyRelativeApiPath() . '/' . $sub_api_path );
 

@@ -26,23 +26,21 @@ class Wrapper
 	 */
 	protected $_definition;
 
-	public function __construct( $parent , $class_or_instance , Definition $definition ) {
+	public function __construct($parent, Definition $definition, array $data=null) {
 		// potential memory leak issue
 		$this->_parent = $parent;
 
-		// set object
-		if ( is_object( $class_or_instance ) ) {
-			$this->_model = $class_or_instance;
-			$this->_model->setParentReference( $parent , $definition );
-			$this->_model_class = get_class( $class_or_instance );
-			$this->_loaded = true;
-		}
-		else {
-			$this->_model_class = $class_or_instance;
-		}
-
 		// use sub api path
 		$this->_definition = $definition;
+		$this->_model_class = $definition->getModelClass();
+
+		// set data
+		if ($data) {
+			$this->_model = new $this->_model_class();
+			$this->_model->fillExistingData(isset($data['id']) ? $data['id'] : null, $data);
+			$this->_model->setParentReference($parent, $definition);
+			$this->_loaded = true;
+		}
 	}
 
 	protected function _load() {

@@ -65,16 +65,16 @@ class Definition
 
 	public function initiateBlankReference( $model  ) {
 		if ( $this->_type === self::TYPE_MULTIPLE ) {
-			return new SetWrapper( $model , $this->getModelClass() , $this );
+			return new SetWrapper($model, $this);
 		}
-		return new Wrapper( $model , $this->_model_class , $this );
+		return new Wrapper($model, $this);
 	}
 
 	public function initiateReferenceData( $model , $data ) {
 		if ( $this->_type === self::TYPE_MULTIPLE ) {
-			return new SetWrapper( $model , $data , $this );
+			return new SetWrapper($model,  $this, $data);
 		}
-		return new Wrapper( $model , $this->_model_class , $this );
+		return new Wrapper($model, $this, $data);
 	}
 
 	public function isReferenceSet( $value ) {

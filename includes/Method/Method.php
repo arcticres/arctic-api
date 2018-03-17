@@ -66,27 +66,51 @@ class Method
 		return true;
 	}
 
-	protected function _prepareRequest( $api_path , $arguments ) {
+	protected function _buildUrl($api_path, $arguments) {
 		$add = '';
 
-        // allow custom variables to be passed with methods as the last argument (must be an array)
-        if ($arguments && is_array($arguments[count($arguments) - 1])) {
-            $add = http_build_query(array_pop($arguments));
-        }
+		// allow custom variables to be passed with methods as the last argument (must be an array)
+		if ($arguments && is_array($arguments[count($arguments) - 1])) {
+			// make sure it has string keys (allows passing non hash arguments for mapping)
+			reset($arguments[count($arguments) - 1]);
+			if (is_string(key($arguments[count($arguments) - 1]))) {
+				$add = http_build_query(array_pop($arguments));
+			}
+		}
 
-        // map arguments onto variables
-		if ( $this->_argument_mapping ) {
-			foreach ( $this->_argument_mapping as $index => $name ) {
-				if ( !isset( $arguments[ $index ] ) ) continue;
-				$add .= ( $add ? '&' : '' ) . urlencode( $name ) . '=' . urlencode( (string)$arguments[ $index ] );
+		// map arguments onto variables
+		if ($this->_argument_mapping) {
+			foreach ($this->_argument_mapping as $index => $name) {
+				// nothing to add?
+				if (!isset( $arguments[$index])) continue;
+
+				// special procedure for arrays
+				if (is_array($arguments[$index])) {
+					$ue_name = urlencode($name);
+					foreach ($arguments[$index] as $value) {
+						$add .= sprintf('%s%s[]=%s', ($add ? '&' : ''), $ue_name, urlencode((string)$value));
+					}
+					continue;
+				}
+
+				$add .= ($add ? '&' : '') . urlencode($name) . '=' . urlencode((string)$arguments[$index]);
 			}
 		}
 
 		// build url
-		$url = $api_path . ( $this->_uri ? '/' . $this->_uri : '' );
-		if ( $add ) $url .= '?' . $add;
+		$url = $api_path . ($this->_uri ? '/' . $this->_uri : '');
+		if ($add) {
+			$url .= '?' . $add;
+		}
 
-		return $this->_runRequest( $url , $this->_method );
+		return $url;
+	}
+
+	protected function _prepareRequest( $api_path , $arguments ) {
+		// encode arguments and build URL
+		$url = $this->_buildUrl($api_path, $arguments);
+
+		return $this->_runRequest($url, $this->_method);
 	}
 
 	public function runRequest( $api_path , $arguments ) {
