@@ -25,7 +25,7 @@ class SetWrapper extends ModelSet
 	 */
 	protected $_definition;
 
-	public function __construct( $parent , $class_or_array , Definition $definition ) {
+	public function __construct($parent, Definition $definition, array $data=null) {
 		parent::__construct( $definition->getModelClass() , array( 'entries' => array() ) );
 
 		// potential memory leak issue
@@ -33,16 +33,12 @@ class SetWrapper extends ModelSet
 
 		// use sub api path
 		$this->_definition = $definition;
+		$this->_model_class = $this->_definition->getModelClass();
 
 		// set object
-		if ( is_array( $class_or_array ) ) {
-			$this->_model_class = $this->_definition->getModelClass();
-			$this->_setLoadedData( $class_or_array );
+		if ($data) {
+			$this->_setLoadedData($data);
 		}
-		else {
-			$this->_model_class = $class_or_array;
-		}
-
 	}
 
 	/**
