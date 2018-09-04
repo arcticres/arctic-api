@@ -12,6 +12,7 @@ use Arctic\Model;
  * @property string $mode
  * @property string $notes
  * @property int $assignedagentid
+ * @property int $assignedpersonid
  * @property int $tripid
  * @property string|null $followupon
  * @property \DateTime $createdon
