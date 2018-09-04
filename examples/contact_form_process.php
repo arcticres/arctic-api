@@ -75,8 +75,9 @@ $note->note = 'Added through contact form.';
 // add the note to the list of references
 $person->notes[] = $note;
 
-// insert both the person and any new references
-if ( $person->insert() ) {
+// first: insert (or if similar to existing, update) the person
+if ($person->insertOrUpdate()) {
+	// second: create inquiry
     $inquiry = new \Arctic\Model\Inquiry\Inquiry();
     $inquiry->personid = $person->id;
     $inquiry->mode = 'Online Form';
