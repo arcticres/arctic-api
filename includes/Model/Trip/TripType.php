@@ -3,6 +3,32 @@
 namespace Arctic\Model\Trip;
 
 use Arctic\Model;
+use Arctic\Method\Method;
+
+class _MethodAvailability extends Method
+{
+	public function __construct() {
+		parent::__construct(Method::TYPE_EXISTING_MODEL, \Arctic\Api::METHOD_POST, 'availability');
+	}
+
+	protected function _prepareRequest($api_path, $arguments) {
+		if (empty($arguments)) throw new \Arctic\Exception\BadRequest('Trip availability data is required.');
+
+		// body
+		$body = array_shift($arguments);
+		if (!is_array($body)) throw new \Arctic\Exception\BadRequest('Expected an associative array for type availability data.');
+
+		// encode arguments and build URL
+		$url = $this->_buildUrl($api_path, $arguments);
+
+		// encode body
+		return $this->_runRequest($url, $this->_method, json_encode($body));
+	}
+
+	protected function _parseResponse($response) {
+		return $response;
+	}
+}
 
 /**
  * Class TripType
@@ -36,6 +62,7 @@ use Arctic\Model;
  * @property \Arctic\Model\BusinessGroup $businessgroup
  * @property PricingLevel[] $pricinglevels
  * @property Component[] $components
+ * @method array updateAvailability(array $data)
  */
 class TripType extends Model
 {
@@ -49,5 +76,14 @@ class TripType extends Model
 		$this->_addSingleReference( 'businessgroup' , 'Arctic\Model\BusinessGroup' , array( 'businessgroupid' => 'id' ) );
 		$this->_addMultipleReference('pricinglevels', __NAMESPACE__ . '\PricingLevel' , 'pricinglevel' );
 		$this->_addMultipleReference('components', __NAMESPACE__ . '\Component' , 'component' );
+	}
+
+	protected static function _mapMethod($method) {
+		// trip type specific method: availability(array $data)
+		if ('updateAvailability' === $method) {
+			return new _MethodAvailability();
+		}
+
+		return parent::_mapMethod($method);
 	}
 }
