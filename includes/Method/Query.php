@@ -65,7 +65,7 @@ class Query extends Method
         // run query
         $cache_manager = Api::getInstance()->getCacheManager();
         $cache_browse = $cache_manager->get($this->_cache_key, $this->_model_class);
-        if (isset($cache_browse)) {
+        if (isset($cache_browse) && is_array($cache_browse)) {
             $use_cache = true;
             foreach ($cache_browse['entries'] as $key => $id) {
                 // load

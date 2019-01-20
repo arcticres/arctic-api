@@ -53,7 +53,8 @@ class Load extends Method
 		}
 
         // check cache
-        if ($cached_response = Api::getInstance()->getCacheManager()->get($this->_cache_key, $this->_model_class)) {
+		$cached_response = Api::getInstance()->getCacheManager()->get($this->_cache_key, $this->_model_class);
+        if (isset($cached_response) && is_array($cached_response)) {
             return $this->_parseResponse($cached_response, false);
         }
 
