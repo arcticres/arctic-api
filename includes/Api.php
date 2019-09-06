@@ -16,6 +16,9 @@ class Api
 {
 	const VERSION = '2.0beta2';
 
+	const AUTH_TYPE_BASIC = 'basic';
+	const AUTH_TYPE_OAUTH = 'oauth';
+
 	const ERRORS_EXCEPTION = 'exception';
 	const ERRORS_ERROR = 'error';
 	const ERRORS_WARNING = 'warning';
@@ -31,6 +34,11 @@ class Api
 	private static $_last_error;
 
 	private $_config;
+
+	/**
+	 * Authentication token for OAuth based authentication.
+	 * @var string|null
+	 */
 	private $_token;
 
 	/**
@@ -122,6 +130,7 @@ class Api
 			'client_id'     =>  '',
 			'client_secret' =>  '',
 			'api_path'      =>  '/api/rest/',
+			'auth_type'     =>  self::AUTH_TYPE_BASIC,
 			'auth_path'     =>  'oauth/application/token',
 			'secure'        =>  true,
 			'errors'        =>  self::ERRORS_EXCEPTION,
@@ -132,6 +141,11 @@ class Api
 		// insert parameters and default values
 		if ( $params ) $config = array_merge( $config , $default_config , $params );
 		else $config = array_merge( $config , $default_config );
+
+		// has client ID? use OAuth authentication by default
+		if ($config['client_id']) {
+			$config['auth_type'] = self::AUTH_TYPE_OAUTH;
+		}
 
 		// assemble host
 		if ( !isset( $config[ 'host' ] ) ) {
@@ -443,15 +457,35 @@ class Api
 	}
 
 	public function sendAuthenticatedRequest( $api_path , $method=self::METHOD_GET , $body=null , array $headers=null ) {
-		// get token
-		$token = $this->_getToken();
-		if (false === $token) return false;
-
 		// build url
 		$url = $this->_getConfig('host') . $this->_getConfig('api_path') . $api_path;
-		$headers = array_merge((array)$headers, array(
-			'Authorization'    =>  'Bearer ' . $token
-		));
+		$headers = (array)$headers;
+
+		// add authentication information
+		switch ($this->_getConfig('auth_type')) {
+			case self::AUTH_TYPE_BASIC:
+				// add to headers
+				$headers = array_merge($headers, array(
+					'Authorization'    =>  sprintf('Basic %s', base64_encode(sprintf('%s:%s', $this->_getConfig('username'), $this->_getConfig('password'))))
+				));
+
+				break;
+
+			case self::AUTH_TYPE_OAUTH:
+				// get token
+				$token = $this->_getToken();
+				if (false === $token) return false;
+
+				// add to headers
+				$headers = array_merge($headers, array(
+					'Authorization'    =>  'Bearer ' . $token
+				));
+
+				break;
+
+			default:
+				return false;
+		}
 
 		// response
 		$this->_should_retry = false;
@@ -459,12 +493,25 @@ class Api
 
 		// allow retry once
 		if ($this->_should_retry) {
-			// get token again, just in case
-			$token = $this->_getToken();
-			if (false === $token) return false;
+			// update authentication information
+			switch ($this->_getConfig('auth_type')) {
+				case self::AUTH_TYPE_BASIC:
+					// should be unreachable (basic authentication should never result in _should_retry being true)
+					return false;
 
-			// updated headers, just in case
-			$headers['Authorization'] = 'Bearer ' . $token;
+				case self::AUTH_TYPE_OAUTH:
+					// get token
+					$token = $this->_getToken();
+					if (false === $token) return false;
+
+					// updated headers, just in case
+					$headers['Authorization'] = 'Bearer ' . $token;
+
+					break;
+
+				default:
+					return false;
+			}
 
 			// run response again
 			$response = $this->_sendRequest($url, $method, $body, $headers);
@@ -474,6 +521,10 @@ class Api
 	}
 
 	public function authenticateFromAuthorizationCode($code, $redirect_uri=null, $cache=true) {
+		if (self::AUTH_TYPE_OAUTH !== $this->_getConfig('auth_type')) {
+			$this->raiseError('Must be configured for OAuth authentication.');
+		}
+
 		// parameters for request
 		$params = array(
 			'grant_type' => 'authorization_code',
@@ -518,6 +569,10 @@ class Api
 	}
 
 	public function buildAuthenticationLink($redirect_uri=null, $scope=null, $state=null) {
+		if (self::AUTH_TYPE_OAUTH !== $this->_getConfig('auth_type')) {
+			$this->raiseError('Must be configured for OAuth authentication.');
+		}
+
 		// build url
 		$url = $this->_getConfig('host') . $this->_getConfig('oauth_link', '/auth/login/oauth');
 
