@@ -23,10 +23,10 @@ class Insert extends Method
 		// fill data
 		$this->_model->fillExistingData( isset( $response[ 'id' ] ) ? $response[ 'id' ] : null , $response );
 
-        // update cache if an ID was returned
-        if (isset($response['id'])) {
-            Api::getInstance()->getCacheManager()->set($response['id'], $response, $this->_model_class);
-        }
+		// update cache if an ID was returned
+		if (isset($response['id'])) {
+			Api::getInstance()->getCacheManager()->set($response['id'], $response, $this->_model_class);
+		}
 
 		// write references too
 		foreach ( $references as $name => $obj ) {

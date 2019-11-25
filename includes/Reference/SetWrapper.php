@@ -87,7 +87,7 @@ class SetWrapper extends ModelSet
 			}
 
 			// prefix path
-            Model::forceRelativeApiPath( $this->_parent->getMyRelativeApiPath() . '/' . $sub_api_path );
+			Model::forceRelativeApiPath( $this->_parent->getMyRelativeApiPath() . '/' . $sub_api_path );
 
 			// run query
 			$class = $this->_model_class;
@@ -142,13 +142,13 @@ class SetWrapper extends ModelSet
 		}
 
 		if ( !$this->_definition->getSubApiPath() && !$this->_definition->getMapping() ) {
-            Api::getInstance()->raiseError('Writing Not Supported','The reference ' . $this->_definition->getName() . ' does not support writing values.');
+			Api::getInstance()->raiseError('Writing Not Supported','The reference ' . $this->_definition->getName() . ' does not support writing values.');
 			return;
 		}
 
 		// check mode class
 		if ( !is_a( $value , $this->_model_class ) ) {
-            Api::getInstance()->raiseError('Expecting ' . $this->_model_class,'You can only add values of the expected type to references.');
+			Api::getInstance()->raiseError('Expecting ' . $this->_model_class,'You can only add values of the expected type to references.');
 			return;
 		}
 
@@ -156,7 +156,7 @@ class SetWrapper extends ModelSet
 
 		// already exists
 		if ( $value->doesExist() ) {
-            Api::getInstance()->raiseError('Expecting New ' . $this->_model_class,'You can only unsaved entries to references.');
+			Api::getInstance()->raiseError('Expecting New ' . $this->_model_class,'You can only unsaved entries to references.');
 			return;
 		}
 

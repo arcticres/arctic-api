@@ -62,8 +62,8 @@ class Wrapper
 			$foreign = reset( $mapping );
 			$local = key( $mapping );
 
-            // mark as loaded (even if loading fails, no need to reattempt)
-            $this->_loaded = true;
+			// mark as loaded (even if loading fails, no need to reattempt)
+			$this->_loaded = true;
 
 			// id
 			$id = $this->_parent->$local;
@@ -98,8 +98,8 @@ class Wrapper
 			if ( !$this->_load() ) return false;
 		}
 
-        // no model
-        if ( !$this->_model ) return null;
+		// no model
+		if ( !$this->_model ) return null;
 
 		return $this->_model->__get( $name );
 
@@ -110,8 +110,8 @@ class Wrapper
 			if ( !$this->_load() ) return;
 		}
 
-        // no model
-        if ( !$this->_model ) throw new Exception( 'Setting property on undefined object.' );
+		// no model
+		if ( !$this->_model ) throw new Exception( 'Setting property on undefined object.' );
 
 		$this->_model->__set( $name , $value );
 	}
@@ -121,8 +121,8 @@ class Wrapper
 			if ( !$this->_load() ) return;
 		}
 
-        // no model
-        if ( !$this->_model ) throw new Exception( 'Setting property on undefined object.' );
+		// no model
+		if ( !$this->_model ) throw new Exception( 'Setting property on undefined object.' );
 
 		$this->_model->__unset( $name );
 	}
@@ -132,8 +132,8 @@ class Wrapper
 			if ( !$this->_load() ) return false;
 		}
 
-        // no model
-        if ( !$this->_model ) return false;
+		// no model
+		if ( !$this->_model ) return false;
 
 		return $this->_model->__isset( $name );
 	}
@@ -143,20 +143,20 @@ class Wrapper
 			if ( !$this->_load() ) return false;
 		}
 
-        if ( !$this->_model ) throw new \BadMethodCallException( 'Unable to call "' . $name . '" on undefined object.' );
+		if ( !$this->_model ) throw new \BadMethodCallException( 'Unable to call "' . $name . '" on undefined object.' );
 
 		return call_user_func_array(array($this->_model, $name), $arguments);
 	}
 
-    /**
-     * Used by wrapper->isset() to see if a reference is defined.
-     * @return bool
-     */
-    public function isDefined() {
-        if ( !$this->_loaded ) {
-            if ( !$this->_load() ) return false;
-        }
+	/**
+	 * Used by wrapper->isset() to see if a reference is defined.
+	 * @return bool
+	 */
+	public function isDefined() {
+		if ( !$this->_loaded ) {
+			if ( !$this->_load() ) return false;
+		}
 
-        return isset( $this->_model );
-    }
+		return isset( $this->_model );
+	}
 }

@@ -82,7 +82,7 @@ class Definition
 			return true;
 		}
 
-        /** @var Wrapper $value */
-        return $value->isDefined();
+		/** @var Wrapper $value */
+		return $value->isDefined();
 	}
 }
