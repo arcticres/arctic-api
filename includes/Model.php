@@ -130,14 +130,16 @@ class Model
 	 * @param $name
 	 * @param $class
 	 * @param array $mapping
+	 * @param bool $embed_in_parent
 	 */
-	protected function _addSingleReference( $name , $class , array $mapping=null ) {
+	protected function _addSingleReference($name, $class, array $mapping=null, $embed_in_parent=false) {
 		$this->_reference_definitions[ $name ] = new Reference\Definition(
 			Reference\Definition::TYPE_SINGLE ,
 			$name ,
 			$class ,
 			null ,
-			$mapping
+			$mapping,
+			$embed_in_parent
 		);
 	}
 
@@ -223,6 +225,17 @@ class Model
 	 */
 	public function getReferences() {
 		return $this->_references;
+	}
+
+	protected function _initiateBlankReference($name) {
+		if (!isset($this->_reference_definitions[$name])) throw new \RuntimeException('Invalid reference.');
+
+		// get wrapper
+		$wrapper = $this->$name;
+		if (!($wrapper instanceof Reference\Wrapper)) throw new \RuntimeException('Invalid reference.');
+
+		// initialize wrapper
+		$wrapper->initializeBlank($this, $this->_reference_definitions[$name]);
 	}
 
 	/**
@@ -323,6 +336,11 @@ class Model
 	public function __isset( $name ) {
 		// is reference set
 		if ( isset( $this->_reference_definitions[ $name ] ) ) {
+			// initiate blank
+			if ( !isset( $this->_references[ $name ] ) ) {
+				$this->_references[ $name ] = $this->_reference_definitions[ $name ]->initiateBlankReference( $this );
+			}
+
 			return $this->_reference_definitions[ $name ]->isReferenceSet( $this->_references[ $name ] );
 		}
 

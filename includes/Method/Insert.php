@@ -20,6 +20,14 @@ class Insert extends Method
 		// get references (before filling data)
 		$references = $this->_model->getReferences();
 
+		// clear references that support directly embedding
+		foreach ($this->_model->getReferenceDefinitions() as $reference_definition) {
+			if ($reference_definition->getEmbedInParent()) {
+				$name = $reference_definition->getName();
+				unset($references[$name]);
+			}
+		}
+
 		// fill data
 		$this->_model->fillExistingData( isset( $response[ 'id' ] ) ? $response[ 'id' ] : null , $response );
 
@@ -46,7 +54,20 @@ class Insert extends Method
 			Api::getInstance()->raiseError('Model Already Saved','Cannot be inserted again.');
 		}
 
+		// build request
+		$request = $this->_model->toArray();
+
+		// add references that support direct embedding
+		foreach ($this->_model->getReferenceDefinitions() as $reference_definition) {
+			if ($reference_definition->getEmbedInParent()) {
+				$name = $reference_definition->getName();
+				if (isset($this->_model->$name)) {
+					$request[$name] = $this->_model->$name->toArray();
+				}
+			}
+		}
+
 		// build uri
-		return $this->_runRequest( $api_path , $this->_method , json_encode( $this->_model->toArray() ) );
+		return $this->_runRequest($api_path, $this->_method, json_encode($request));
 	}
 }

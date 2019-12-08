@@ -33,6 +33,19 @@ class Update extends Method
 			$changed[ $key ] = $val[ 1 ];
 		}
 
+		// add references that support direct embedding
+		foreach ($this->_model->getReferenceDefinitions() as $reference_definition) {
+			if ($reference_definition->getEmbedInParent()) {
+				$name = $reference_definition->getName();
+				if (isset($this->_model->$name) && $delta = $this->_model->$name) {
+					$changed[$name] = [];
+					foreach ($delta as $key => $val) {
+						$changed[$name][$key] = $val[1];
+					}
+				}
+			}
+		}
+
 		// nothing changed
 		if ( empty( $changed ) ) {
 			return $this->_model;
