@@ -37,7 +37,7 @@ class Update extends Method
 		foreach ($this->_model->getReferenceDefinitions() as $reference_definition) {
 			if ($reference_definition->getEmbedInParent()) {
 				$name = $reference_definition->getName();
-				if (isset($this->_model->$name) && $delta = $this->_model->$name) {
+				if (isset($this->_model->$name) && $delta = $this->_model->$name->delta()) {
 					$changed[$name] = [];
 					foreach ($delta as $key => $val) {
 						$changed[$name][$key] = $val[1];
