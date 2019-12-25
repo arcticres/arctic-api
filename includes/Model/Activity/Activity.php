@@ -4,6 +4,43 @@ namespace Arctic\Model\Activity;
 
 use Arctic\Model;
 
+class _MethodStatus extends \Arctic\Method\Method
+{
+	public function __construct() {
+		parent::__construct(self::TYPE_EXISTING_MODEL, \Arctic\Api::METHOD_POST, 'status');
+	}
+
+	protected function _prepareRequest( $api_path , $arguments ) {
+		$request = [
+			'status' => $arguments[0]
+		];
+		if (isset($arguments[1])) {
+			$request['cancellation_fee'] = $arguments[1];
+		}
+		if (isset($arguments[2])) {
+			$request['preserve_commissions'] = $arguments[2];
+		}
+
+		// encode arguments and build URL
+		$url = $this->_buildUrl($api_path, $arguments);
+
+		// run the request
+		return $this->_runRequest($url, $this->_method, json_encode($request));
+	}
+
+	protected function _parseResponse($response) {
+		// reload model data
+		$this->_model->fillExistingData( $this->_model->getID()  , $response );
+
+		// update cache if an ID was returned
+		if ($id = $this->_model->getID()) {
+			\Arctic\Api::getInstance()->getCacheManager()->set($id, $response, $this->_model_class);
+		}
+
+		return $this->_model;
+	}
+}
+
 /**
  * @class Activity
  * @property int $businessgroupid
@@ -38,6 +75,7 @@ use Arctic\Model;
  * @property \Arctic\Model\Invoice\Invoice $invoice
  * @property \Arctic\Model\Person\Person $person
  * @property \Arctic\Model\Person\Person $bookingagent
+ * @method setStatus($status, $cancellation_fee=null, $preserve_commissions=false)
  */
 class Activity extends Model
 {
@@ -66,5 +104,14 @@ class Activity extends Model
 		$this->_addSingleReference('bookingagent', 'Arctic\Model\Person\Person', array('bookingagentid'=>'id'));
 		$this->_addSingleReference('parentactivity', __NAMESPACE__ . '\Activity', array('parentactivityid' => 'id'));
 		$this->_addMultipleReference('subactivities', __NAMESPACE__ . '\Activity', array('id' => 'parentactivityid'));
+	}
+
+	protected static function _mapMethod( $method ) {
+		// activity specific method: setStatus($status=null, $cancellation_fee=null, $preserve_commissions=false)
+		if ( $method === 'setStatus' ) {
+			return new _MethodStatus();
+		}
+
+		return parent::_mapMethod($method);
 	}
 }
