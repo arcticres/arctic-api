@@ -107,7 +107,7 @@ class Wrapper
 
 	public function __set( $name , $value ) {
 		if ( !$this->_loaded ) {
-			if ( !$this->_load() ) return;
+			$this->_load();
 		}
 
 		// no model
@@ -158,5 +158,12 @@ class Wrapper
 		}
 
 		return isset( $this->_model );
+	}
+
+	public function initializeBlank($parent, $definition) {
+		$this->_model = new $this->_model_class();
+		$this->_model->fillExistingData(null, []);
+		$this->_model->setParentReference($parent, $definition);
+		$this->_loaded = true;
 	}
 }
