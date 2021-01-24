@@ -21,6 +21,7 @@ Support for:
 * Persons
 * Person metadata - addresses, phone numbers, email addresses, notes
 * Inquiries
+* Tasks
 * Invoices
 * Invoice data - groups, items, transactions
 * Activities
@@ -37,6 +38,8 @@ Support for:
 * Rental items
 * Rental item pricing levels
 * Business groups
+* Evaluation Responses
+* Trip Form Responses
 
 Requires PHP 5.3+ (supports PHP 7.0).
 
