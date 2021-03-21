@@ -1,26 +1,26 @@
 <?php
 
-namespace Arctic\Model\EvaluationResponse;
+namespace Arctic\Model\TripForm;
 
 use Arctic\Model;
 
 /**
- * Class EvaluationResponse
+ * Class Response
  * @property int $businessgroupid
- * @property int $evaluationid
+ * @property int $triptripformid
+ * @property int $tripformformid
  * @property int $id
+ * @property int $tripid
  * @property int $personid
- * @property int $activityid
- * @property string $useragent
- * @property \DateTime $time
- * @property \Arctic\Model\Activity\Activity $activity
+ * @property DateTime $time
+ * @property \Arctic\Model\Trip\Trip $trip
  * @property \Arctic\Model\BusinessGroup $businessgroup
  * @property \Arctic\Model\Person\Person $person
  */
-class EvaluationResponse extends Model
+class Response extends Model
 {
 	public static function getApiPath() {
-		return 'evaluationresponse';
+		return 'tripformresponse';
 	}
 
 	public function __construct() {
@@ -28,6 +28,6 @@ class EvaluationResponse extends Model
 
 		$this->_addSingleReference( 'businessgroup' , 'Arctic\Model\BusinessGroup' , array( 'businessgroupid' => 'id' ) );
 		$this->_addSingleReference( 'person' , 'Arctic\Model\Person\Person' , array( 'personid' => 'id' ) );
-		$this->_addSingleReference( 'activity' , 'Arctic\Model\Activity\Activity' , array( 'activityid' => 'id' ) );
+		$this->_addSingleReference( 'trip' , 'Arctic\Model\Trip\Trip' , array( 'tripid' => 'id' ) );
 	}
 }

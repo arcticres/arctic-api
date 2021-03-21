@@ -8,7 +8,7 @@ use Arctic\Model;
  * Class Inquiry
  * @property int $businessgroupid
  * @property int $id
- * @property string $personid
+ * @property int $personid
  * @property string $mode
  * @property string $notes
  * @property int $assignedagentid
