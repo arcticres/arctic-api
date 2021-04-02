@@ -4,7 +4,7 @@
 chdir(__DIR__);
 require 'init.i.php';
 
-// create a new person and fill in details (name)
+// create a new person and fill in name
 $person = new \Arctic\Model\Person\Person();
 $person->namefirst = 'Hannah';
 $person->namelast = 'Wyoming';

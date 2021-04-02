@@ -1,32 +1,26 @@
 <?php
 
-namespace Arctic\Model\Inquiry;
+namespace Arctic\Model\TripForm;
 
 use Arctic\Model;
 
 /**
- * Class Inquiry
+ * Class Response
  * @property int $businessgroupid
+ * @property int $triptripformid
+ * @property int $tripformformid
  * @property int $id
- * @property int $personid
- * @property string $mode
- * @property string $notes
- * @property int $assignedagentid
- * @property int $assignedpersonid
  * @property int $tripid
- * @property string|null $followupon
- * @property \DateTime $createdon
- * @property \DateTime $modifiedon
- * @property \DateTime|null $followedupon
- * @property bool $deleted
+ * @property int $personid
+ * @property DateTime $time
  * @property \Arctic\Model\Trip\Trip $trip
  * @property \Arctic\Model\BusinessGroup $businessgroup
  * @property \Arctic\Model\Person\Person $person
  */
-class Inquiry extends Model
+class Response extends Model
 {
 	public static function getApiPath() {
-		return 'inquiry';
+		return 'tripformresponse';
 	}
 
 	public function __construct() {
