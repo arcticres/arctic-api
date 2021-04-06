@@ -27,8 +27,11 @@ class Reservation extends Model
 	public function __construct() {
 		parent::__construct();
 
-		$this->_addSingleReference('activity', '\Arctic\Model\Activity\Activity', array('activityid' => 'id'));
+		$this->_addSingleReference('activity', '\Arctic\Model\Activity\Activity', array('activityid' => 'id'), true);
 		$this->_addSingleReference('trip', '\Arctic\Model\Trip\Trip', array('tripid' => 'id'));
 		$this->_addMultipleReference('members', __NAMESPACE__ . '\ReservationMember', 'member');
+
+		// initialize activity
+		$this->_initiateBlankReference('activity');
 	}
 }

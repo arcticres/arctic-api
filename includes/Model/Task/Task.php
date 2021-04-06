@@ -1,39 +1,35 @@
 <?php
 
-namespace Arctic\Model\Inquiry;
+namespace Arctic\Model\Task;
 
 use Arctic\Model;
 
 /**
- * Class Inquiry
+ * Class Task
  * @property int $businessgroupid
  * @property int $id
- * @property int $personid
- * @property string $mode
  * @property string $notes
  * @property int $assignedagentid
- * @property int $assignedpersonid
  * @property int $tripid
- * @property string|null $followupon
+ * @property string|null $dueon
  * @property \DateTime $createdon
  * @property \DateTime $modifiedon
- * @property \DateTime|null $followedupon
+ * @property int $createdbyuserid
+ * @property \DateTime|null $completedon
  * @property bool $deleted
  * @property \Arctic\Model\Trip\Trip $trip
  * @property \Arctic\Model\BusinessGroup $businessgroup
- * @property \Arctic\Model\Person\Person $person
  */
-class Inquiry extends Model
+class Task extends Model
 {
 	public static function getApiPath() {
-		return 'inquiry';
+		return 'task';
 	}
 
 	public function __construct() {
 		parent::__construct();
 
 		$this->_addSingleReference( 'businessgroup' , 'Arctic\Model\BusinessGroup' , array( 'businessgroupid' => 'id' ) );
-		$this->_addSingleReference( 'person' , 'Arctic\Model\Person\Person' , array( 'personid' => 'id' ) );
 		$this->_addSingleReference( 'trip' , 'Arctic\Model\Trip\Trip' , array( 'tripid' => 'id' ) );
 	}
 }

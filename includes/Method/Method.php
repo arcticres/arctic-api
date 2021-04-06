@@ -49,13 +49,13 @@ class Method
 
 		// invalid type
 		if ( !is_array( $response ) ) {
-            Api::getInstance()->raiseError('Invalid Response','Expected an array. Received: ' . gettype( $response ) . '.');
+			Api::getInstance()->raiseError('Invalid Response','Expected an array. Received: ' . gettype( $response ) . '.');
 			return false;
 		}
 
 		// error
 		if ( isset( $response[ 'error' ] ) ) {
-            Api::getInstance()->raiseError($response['error'], isset( $response['details'] ) ? $response['details'] : null);
+			Api::getInstance()->raiseError($response['error'], isset( $response['details'] ) ? $response['details'] : null);
 			return false;
 		}
 
@@ -117,18 +117,18 @@ class Method
 		switch ( $this->_type ) {
 			case self::TYPE_GENERAL:
 				if ( $this->_model ) {
-                    Api::getInstance()->raiseError('Invalid Method ' . __CLASS__,'General method called on model instance.');
+					Api::getInstance()->raiseError('Invalid Method ' . __CLASS__,'General method called on model instance.');
 					return false;
 				}
 				break;
 			case self::TYPE_EXISTING_MODEL:
 				if ( $this->_model && !$this->_model->doesExist() ) {
-                    Api::getInstance()->raiseError('Invalid Method ' . __CLASS__,'Model method called on unsaved instance.');
+					Api::getInstance()->raiseError('Invalid Method ' . __CLASS__,'Model method called on unsaved instance.');
 					return false;
 				}
 			case self::TYPE_MODEL:
 				if ( !$this->_model ) {
-                    Api::getInstance()->raiseError('Invalid Method ' . __CLASS__,'Model method called on general instance.');
+					Api::getInstance()->raiseError('Invalid Method ' . __CLASS__,'Model method called on general instance.');
 					return false;
 				}
 				break;

@@ -10,7 +10,7 @@ $invoice = \Arctic\Model\Invoice\Invoice::load(185);
 // total cost
 echo "Total Cost: ", $invoice->totalcost, PHP_EOL;
 
-// change amount of first subitem
+// change amount of first sub-item
 $item = $invoice->groups[0]->items[0]->subitems[0];
 echo "Change ", $item->shortname, " amount from " , $item->amount;
 $item->amount += 0.25;

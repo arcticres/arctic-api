@@ -54,9 +54,9 @@ class Trip extends Model
 	public function __construct() {
 		parent::__construct();
 
-        $this->_addSingleReference( 'businessgroup' , 'Arctic\Model\BusinessGroup' , array( 'businessgroupid' => 'id' ) );
-        $this->_addMultipleReference('pricinglevels', __NAMESPACE__ . '\PricingLevel' , 'pricinglevel' );
-        $this->_addMultipleReference('components', __NAMESPACE__ . '\Component' , 'component' );
-        $this->_addMultipleReference('guides', 'Arctic\Model\Guide\GuideSchedule', 'guide');
+		$this->_addSingleReference( 'businessgroup' , 'Arctic\Model\BusinessGroup' , array( 'businessgroupid' => 'id' ) );
+		$this->_addMultipleReference('pricinglevels', __NAMESPACE__ . '\PricingLevel' , 'pricinglevel' );
+		$this->_addMultipleReference('components', __NAMESPACE__ . '\Component' , 'component' );
+		$this->_addMultipleReference('guides', 'Arctic\Model\Guide\GuideSchedule', 'guide');
 	}
 }

@@ -130,7 +130,7 @@ class Api
 			'client_id'     =>  '',
 			'client_secret' =>  '',
 			'api_path'      =>  '/api/rest/',
-			'auth_type'     =>  self::AUTH_TYPE_BASIC,
+			'auth_type'     =>  null,
 			'auth_path'     =>  'oauth/application/token',
 			'secure'        =>  true,
 			'errors'        =>  self::ERRORS_EXCEPTION,
@@ -142,9 +142,14 @@ class Api
 		if ( $params ) $config = array_merge( $config , $default_config , $params );
 		else $config = array_merge( $config , $default_config );
 
-		// has client ID? use OAuth authentication by default
-		if ($config['client_id']) {
-			$config['auth_type'] = self::AUTH_TYPE_OAUTH;
+		// has client ID? determine auth type by presence of client_id
+		if (null === $config['auth_type']) {
+			if ($config['client_id']) {
+				$config['auth_type'] = self::AUTH_TYPE_OAUTH;
+			}
+			else {
+				$config['auth_type'] = self::AUTH_TYPE_BASIC;
+			}
 		}
 
 		// assemble host

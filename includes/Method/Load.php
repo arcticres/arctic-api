@@ -16,16 +16,16 @@ class Load extends Method
 
 	/**
 	 * @param array $response
-     * @param bool $update_cache
+	 * @param bool $update_cache
 	 * @return Model
 	 */
 	protected function _parseResponse($response, $update_cache=true) {
 		$class = $this->_model_class;
 
-        // update cache?
-        if ($update_cache) {
-            Api::getInstance()->getCacheManager()->set($this->_cache_key, $response, $class);
-        }
+		// update cache?
+		if ($update_cache) {
+			Api::getInstance()->getCacheManager()->set($this->_cache_key, $response, $class);
+		}
 
 		/** @var Model $me */
 		$me = new $class();
@@ -38,10 +38,10 @@ class Load extends Method
 		// first element
 		$this->_id = reset( $arguments );
 
-        // check for ID
-        if ( empty( $this->_id ) ) {
-            Api::getInstance()->raiseError('No ID Specified','Load expects a valid object ID to fetch.');
-        }
+		// check for ID
+		if ( empty( $this->_id ) ) {
+			Api::getInstance()->raiseError('No ID Specified','Load expects a valid object ID to fetch.');
+		}
 
 		// include special arguments in cache key
 		$last = count($arguments) - 1;
@@ -52,11 +52,11 @@ class Load extends Method
 			$this->_cache_key = $this->_id;
 		}
 
-        // check cache
+		// check cache
 		$cached_response = Api::getInstance()->getCacheManager()->get($this->_cache_key, $this->_model_class);
-        if (isset($cached_response) && is_array($cached_response)) {
-            return $this->_parseResponse($cached_response, false);
-        }
+		if (isset($cached_response) && is_array($cached_response)) {
+			return $this->_parseResponse($cached_response, false);
+		}
 
 		// build uri
 		$uri = $api_path . '/' . urlencode( $this->_id );

@@ -18,10 +18,10 @@ class Update extends Method
 	protected function _parseResponse( $response ) {
 		$this->_model->fillExistingData( $this->_model->getID() , $response );
 
-        // update cache if an ID was returned
-        if ($id = $this->_model->getID()) {
-            Api::getInstance()->getCacheManager()->set($id, $response, $this->_model_class);
-        }
+		// update cache if an ID was returned
+		if ($id = $this->_model->getID()) {
+			Api::getInstance()->getCacheManager()->set($id, $response, $this->_model_class);
+		}
 
 		return $this->_model;
 	}
@@ -31,6 +31,19 @@ class Update extends Method
 		$changed = array();
 		foreach ( $this->_model->delta() as $key => $val ) {
 			$changed[ $key ] = $val[ 1 ];
+		}
+
+		// add references that support direct embedding
+		foreach ($this->_model->getReferenceDefinitions() as $reference_definition) {
+			if ($reference_definition->getEmbedInParent()) {
+				$name = $reference_definition->getName();
+				if (isset($this->_model->$name) && $delta = $this->_model->$name->delta()) {
+					$changed[$name] = [];
+					foreach ($delta as $key => $val) {
+						$changed[$name][$key] = $val[1];
+					}
+				}
+			}
 		}
 
 		// nothing changed
